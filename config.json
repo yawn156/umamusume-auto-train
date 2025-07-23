@@ -1,0 +1,5 @@
+{
+  "priority_stat": ["spd", "sta", "wit", "pwr", "guts"],
+  "minimum_mood": "NORMAL",
+  "maximum_failure": 10
+}
