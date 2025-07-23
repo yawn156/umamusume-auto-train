@@ -4,6 +4,8 @@ Like the title says – this is a simple auto training for Umamusume.
 
 This project is inspired by [shiokaze/UmamusumeAutoTrainer](https://github.com/shiokaze/UmamusumeAutoTrainer)
 
+[Demo video](https://youtu.be/CXSYVD-iMJk)
+
 ## Features
 
 - Automatically trains Uma
