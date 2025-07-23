@@ -6,6 +6,8 @@ This project is inspired by [shiokaze/UmamusumeAutoTrainer](https://github.com/s
 
 [Demo video](https://youtu.be/CXSYVD-iMJk)
 
+![Screenshot](screenshot.png)
+
 ## Features
 
 - Automatically trains Uma
