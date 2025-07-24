@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 from PIL import ImageGrab, ImageStat
 
+from utils.screenshot import capture_region
+
 def match_template(template_path, region=None, threshold=0.85):
   # Get screenshot
   if region:
@@ -33,10 +35,10 @@ def deduplicate_boxes(boxes, min_dist=5):
   return filtered
 
 def is_infirmary_active(REGION):
-  screenshot = ImageGrab.grab(bbox=REGION)
+  screenshot = capture_region(REGION)
   grayscale = screenshot.convert("L")
   stat = ImageStat.Stat(grayscale)
   avg_brightness = stat.mean[0]
 
   # Treshold infirmary btn
-  return avg_brightness > 175
+  return avg_brightness > 150

@@ -102,7 +102,7 @@ def check_turn():
   if cleaned_text:
     return int(cleaned_text)
   
-  return 99
+  return -1
 
 # Check year
 def check_current_year():

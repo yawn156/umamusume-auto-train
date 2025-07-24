@@ -75,11 +75,11 @@ def do_rest():
 def do_recreation():
   click(img="assets/buttons/recreation_btn.png")
 
-def do_race():
+def do_race(prioritize_g1 = False):
   click(img="assets/buttons/races_btn.png", minSearch=10)
   click(img="assets/buttons/ok_btn.png", minSearch=0.7)
 
-  found = race_select()
+  found = race_select(prioritize_g1=prioritize_g1)
   if not found:
     print("[INFO] No race found.")
     return False
@@ -103,12 +103,13 @@ def race_day():
   time.sleep(1)
   after_race()
 
-def race_select():
+def race_select(prioritize_g1 = False):
   pyautogui.moveTo(x=560, y=680)
 
   time.sleep(0.2)
 
-  if PRIORITIZE_G1_RACE:
+  if prioritize_g1:
+    print("[INFO] Looking for G1 race.")
     for i in range(2):
       race_card = match_template("assets/ui/g1_race.png", threshold=0.8)
 
@@ -133,6 +134,7 @@ def race_select():
     
     return False
   else:
+    print("[INFO] Looking for race.")
     for i in range(4):
       match_aptitude = pyautogui.locateCenterOnScreen("assets/ui/match_track.png", confidence=0.8, minSearchTime=0.7)
       if match_aptitude:
@@ -156,12 +158,16 @@ def race_select():
 def race_prep():
   view_result_btn = pyautogui.locateCenterOnScreen("assets/buttons/view_results.png", confidence=0.8, minSearchTime=20)
   if view_result_btn:
-    for i in range(2):
-      pyautogui.tripleClick(view_result_btn, interval=0.5)
+    pyautogui.click(view_result_btn)
+    time.sleep(0.5)
+    for i in range(3):
+      pyautogui.tripleClick(interval=0.2)
+      time.sleep(0.5)
 
 def after_race():
   click(img="assets/buttons/next_btn.png", minSearch=5)
-  time.sleep(2)
+  time.sleep(0.3)
+  pyautogui.click()
   click(img="assets/buttons/next2_btn.png", minSearch=5)
 
 def career_lobby():
@@ -191,9 +197,9 @@ def career_lobby():
     time.sleep(0.5)
 
     # Check if there is debuff status
-    debuffed = pyautogui.locateCenterOnScreen("assets/buttons/infirmary_btn2.png", confidence=0.9, minSearchTime=1)
-    if debuffed is not None:
-      if is_infirmary_active((debuffed.x, debuffed.y, debuffed.x + 108, debuffed.y + 76)):
+    debuffed = pyautogui.locateOnScreen("assets/buttons/infirmary_btn2.png", confidence=0.9, minSearchTime=1)
+    if debuffed:
+      if is_infirmary_active((debuffed.left, debuffed.top, debuffed.width, debuffed.height)):
         pyautogui.click(debuffed)
         print("[INFO] Character has debuff, go to infirmary instead.")
         continue
@@ -246,8 +252,8 @@ def career_lobby():
 
     year_parts = year.split(" ")
     # If Prioritize G1 Race is true, check G1 race every turn
-    if PRIORITIZE_G1_RACE and len(year_parts) > 3 and year_parts[3] not in ["Jul", "Aug"]:
-      g1_race_found = do_race()
+    if PRIORITIZE_G1_RACE and year_parts[0] != "Junior" and len(year_parts) > 3 and year_parts[3] not in ["Jul", "Aug"]:
+      g1_race_found = do_race(PRIORITIZE_G1_RACE)
       if g1_race_found:
         continue
       else:

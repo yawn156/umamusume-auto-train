@@ -15,6 +15,7 @@ This project is inspired by [shiokaze/UmamusumeAutoTrainer](https://github.com/s
 - Checks mood
 - Handle debuffs
 - Rest
+- Prioritizes G1 races if available for fan farming
 
 ## Getting Started
 
@@ -57,7 +58,6 @@ You can edit your configuration in `config.json`
   "maximum_failure": 10,
   "prioritize_g1_race": false
 }
-
 ```
 
 `priority_stat` (array of strings)
