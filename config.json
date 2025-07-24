@@ -1,5 +1,6 @@
 {
   "priority_stat": ["spd", "sta", "wit", "pwr", "guts"],
   "minimum_mood": "NORMAL",
-  "maximum_failure": 10
+  "maximum_failure": 10,
+  "prioritize_g1_race": false
 }
