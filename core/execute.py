@@ -28,7 +28,7 @@ def click(img, confidence = 0.8, minSearch = 2, click = 1, text = ""):
   return False
 
 def go_to_training():
-  click("assets/buttons/training_btn.png")
+  return click("assets/buttons/training_btn.png")
 
 def check_training():
   training_types = {
@@ -111,7 +111,7 @@ def race_select(prioritize_g1 = False):
   if prioritize_g1:
     print("[INFO] Looking for G1 race.")
     for i in range(2):
-      race_card = match_template("assets/ui/g1_race.png", threshold=0.8)
+      race_card = match_template("assets/ui/g1_race.png", threshold=0.9)
 
       if race_card:
         for x, y, w, h in race_card:
@@ -237,6 +237,7 @@ def career_lobby():
 
     # Mood check
     if mood_index < minimum_mood:
+      print("[INFO] Mood is low, trying recreation to increase mood")
       do_recreation()
       continue
 
@@ -261,8 +262,12 @@ def career_lobby():
         click(img="assets/buttons/back_btn.png", text="[INFO] G1 race not found. Proceeding to training.")
         time.sleep(0.5)
     
+    # Check training button
+    if not go_to_training():
+      print("[INFO] Training button is not found.")
+      continue
+
     # Last, do training
-    go_to_training()
     time.sleep(0.5)
     results_training = check_training()
     
