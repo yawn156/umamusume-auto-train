@@ -73,6 +73,7 @@ def check_failure():
 
   return -1
 
+# Check mood
 def check_mood():
   mood = capture_region(MOOD_REGION)
   mood_text = extract_text(mood).upper()
@@ -86,23 +87,27 @@ def check_mood():
 
 # Check turn
 def check_turn():
-  turn = enhanced_screenshot(TURN_REGION)
-  turn_text = extract_text(turn)
-  if "Race Day" in turn_text:
-    return "Race Day"
-  
-  # sometimes easyocr misread characters instead of numbers
-  cleaned_text = (
-    turn_text
-    .replace("T", "1")
-    .replace("I", "1")
-    .replace("O", "0")
-    .replace("S", "5")
-  )
-  if cleaned_text:
-    return int(cleaned_text)
-  
-  return -1
+    turn = enhanced_screenshot(TURN_REGION)
+    turn_text = extract_text(turn)
+
+    if "Race Day" in turn_text:
+        return "Race Day"
+
+    # sometimes easyocr misreads characters instead of numbers
+    cleaned_text = (
+        turn_text
+        .replace("T", "1")
+        .replace("I", "1")
+        .replace("O", "0")
+        .replace("S", "5")
+    )
+
+    digits_only = re.sub(r"[^\d]", "", cleaned_text)
+
+    if digits_only:
+      return int(digits_only)
+    
+    return -1
 
 # Check year
 def check_current_year():
