@@ -68,12 +68,24 @@ def do_train(train):
 def do_rest():
   rest_btn = pyautogui.locateCenterOnScreen("assets/buttons/rest_btn.png", confidence=0.8)
   rest_summber_btn = pyautogui.locateCenterOnScreen("assets/buttons/rest_summer_btn.png", confidence=0.8)
-  if rest_btn or rest_summber_btn:
+
+  if rest_btn:
+    pyautogui.moveTo(rest_btn, duration=0.15)
     pyautogui.click(rest_btn)
+  elif rest_summber_btn:
+    pyautogui.moveTo(rest_summber_btn, duration=0.15)
     pyautogui.click(rest_summber_btn)
 
 def do_recreation():
-  click(img="assets/buttons/recreation_btn.png")
+  recreation_btn = pyautogui.locateCenterOnScreen("assets/buttons/recreation_btn.png", confidence=0.8)
+  recreation_summer_btn = pyautogui.locateCenterOnScreen("assets/buttons/rest_summer_btn.png", confidence=0.8)
+
+  if recreation_btn:
+    pyautogui.moveTo(recreation_btn, duration=0.15)
+    pyautogui.click(recreation_btn)
+  elif recreation_summer_btn:
+    pyautogui.moveTo(recreation_summer_btn, duration=0.15)
+    pyautogui.click(recreation_summer_btn)
 
 def do_race(prioritize_g1 = False):
   click(img="assets/buttons/races_btn.png", minSearch=10)
