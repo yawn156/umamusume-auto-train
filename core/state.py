@@ -117,3 +117,40 @@ def check_criteria():
   img = enhanced_screenshot(CRITERIA_REGION)
   text = extract_text(img)
   return text
+
+# Check skill points
+def check_skill_points():
+  from utils.constants import SKILL_PTS_REGION
+  img = enhanced_screenshot(SKILL_PTS_REGION)
+  number = extract_number(img)
+  digits = ''.join(filter(str.isdigit, number))
+  return int(digits) if digits.isdigit() else 0
+
+# Check skill points and handle cap
+def check_skill_points_cap():
+  import json
+  from pymsgbox import confirm
+  
+  # Load config
+  with open("config.json", "r", encoding="utf-8") as file:
+    config = json.load(file)
+  
+  skill_point_cap = config.get("skill_point_cap", 100)
+  current_skill_points = check_skill_points()
+  
+  print(f"[INFO] Current skill points: {current_skill_points}, Cap: {skill_point_cap}")
+  
+  if current_skill_points > skill_point_cap:
+    print(f"[WARNING] Skill points ({current_skill_points}) exceed cap ({skill_point_cap})")
+    
+    # Show confirmation dialog 
+    result = confirm(
+      text=f"Skill points ({current_skill_points}) exceed the cap ({skill_point_cap}).\n\nYou can:\n• Use your skill points manually, then click OK\n• Click OK without spending (automation continues)\n\nNote: This check only happens on race days.",
+      title="Skill Points Cap Reached",
+      buttons=['OK']
+    )
+    
+    print("[INFO] Automation continuing (player may or may not have spent skill points)")
+    return True
+  
+  return True

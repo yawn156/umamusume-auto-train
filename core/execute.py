@@ -102,6 +102,20 @@ def do_race(prioritize_g1 = False):
   return True
 
 def race_day():
+  # Check skill points cap before race day (if enabled)
+  from core.state import check_skill_points_cap
+  import json
+  
+  # Load config to check if skill point check is enabled
+  with open("config.json", "r", encoding="utf-8") as file:
+    config = json.load(file)
+  
+  enable_skill_check = config.get("enable_skill_point_check", True)
+  
+  if enable_skill_check:
+    print("[INFO] Race Day - Checking skill points cap...")
+    check_skill_points_cap()
+  
   click(img="assets/buttons/race_day_btn.png", minSearch=10)
   
   click(img="assets/buttons/ok_btn.png", minSearch=0.7)
@@ -177,10 +191,10 @@ def race_prep():
       time.sleep(0.5)
 
 def after_race():
-  click(img="assets/buttons/next_btn.png", minSearch=5)
-  time.sleep(0.3)
+  click(img="assets/buttons/next_btn.png", minSearch=6)
+  time.sleep(0.5) # Raise a bit
   pyautogui.click()
-  click(img="assets/buttons/next2_btn.png", minSearch=5)
+  click(img="assets/buttons/next2_btn.png", minSearch=6)
 
 def career_lobby():
   # Program start
