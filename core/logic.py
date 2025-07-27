@@ -8,10 +8,29 @@ with open("config.json", "r", encoding="utf-8") as file:
 PRIORITY_STAT = config["priority_stat"]
 MAX_FAILURE = config["maximum_failure"]
 STAT_CAPS = config["stat_caps"]
+MIN_SUPPORT = config.get("min_support", 2)
 
 # Get priority stat from config
 def get_stat_priority(stat_key: str) -> int:
   return PRIORITY_STAT.index(stat_key) if stat_key in PRIORITY_STAT else 999
+
+# Check if any training has enough support cards
+def has_sufficient_support(results):
+  for stat, data in results.items():
+    if int(data["failure"]) <= MAX_FAILURE and data["total_support"] >= MIN_SUPPORT:
+      # Special handling for WIT - requires at least 2 support cards
+      if stat == "wit" and data["total_support"] >= 2:
+        return True
+      elif stat != "wit":
+        return True
+  return False
+
+# Check if all training options have failure rates above maximum
+def all_training_unsafe(results):
+  for stat, data in results.items():
+    if int(data["failure"]) <= MAX_FAILURE:
+      return False
+  return True
 
 # Will do train with the most support card
 # Used in the first year (aim for rainbow)
@@ -97,8 +116,33 @@ def filter_by_stat_caps(results, current_stats):
     if current_stats.get(stat, 0) < STAT_CAPS.get(stat, 1200)
   }
   
-# Decide training
+# Decide training (with race prioritization)
 def do_something(results):
+  year = check_current_year()
+  current_stats = stat_state()
+  print(f"Current stats: {current_stats}")
+
+  filtered = filter_by_stat_caps(results, current_stats)
+
+  if not filtered:
+    print("[INFO] All stats capped or no valid training.")
+    return None
+
+  if "Junior Year" in year:
+    return most_support_card(filtered)
+  else:
+    result = rainbow_training(filtered)
+    if result is None:
+      print("[INFO] Falling back to most_support_card because rainbow not available.")
+      # Check if any training has sufficient support cards
+      if not has_sufficient_support(filtered):
+        print(f"\n[INFO] No training has >= {MIN_SUPPORT} support cards. Prioritizing race instead.")
+        return "PRIORITIZE_RACE"
+      return most_support_card(filtered)
+  return result
+
+# Decide training (without race prioritization - fallback)
+def do_something_fallback(results):
   year = check_current_year()
   current_stats = stat_state()
   print(f"Current stats: {current_stats}")

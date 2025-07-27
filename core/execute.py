@@ -5,8 +5,16 @@ import json
 pyautogui.useImageNotFoundException(False)
 
 from core.state import check_support_card, check_failure, check_turn, check_mood, check_current_year, check_criteria
-from core.logic import do_something
+from core.logic import do_something, do_something_fallback, all_training_unsafe, MAX_FAILURE
 from utils.constants import MOOD_LIST
+
+def is_racing_available(year):
+  """Check if racing is available based on the current year/month"""
+  year_parts = year.split(" ")
+  # No races in July and August (summer break)
+  if len(year_parts) > 3 and year_parts[3] in ["Jul", "Aug"]:
+    return False
+  return True
 from core.recognizer import is_infirmary_active, match_template
 from utils.scenario import ura
 
@@ -279,7 +287,7 @@ def career_lobby():
 
     year_parts = year.split(" ")
     # If Prioritize G1 Race is true, check G1 race every turn
-    if PRIORITIZE_G1_RACE and year_parts[0] != "Junior" and len(year_parts) > 3 and year_parts[3] not in ["Jul", "Aug"]:
+    if PRIORITIZE_G1_RACE and year_parts[0] != "Junior" and is_racing_available(year):
       g1_race_found = do_race(PRIORITIZE_G1_RACE)
       if g1_race_found:
         continue
@@ -298,7 +306,38 @@ def career_lobby():
     results_training = check_training()
     
     best_training = do_something(results_training)
-    if best_training:
+    if best_training == "PRIORITIZE_RACE":
+      print("[INFO] Prioritizing race due to insufficient support cards.")
+      
+      # Check if all training options are unsafe before attempting race
+      if all_training_unsafe(results_training):
+        print(f"[INFO] All training options have failure rate > {MAX_FAILURE}%. Skipping race and choosing to rest.")
+        do_rest()
+        continue
+      
+      # Check if racing is available (no races in July/August)
+      if not is_racing_available(year):
+        print("[INFO] July/August detected. No races available during summer break. Choosing to rest.")
+        do_rest()
+        continue
+      
+      race_found = do_race()
+      if race_found:
+        continue
+      else:
+        # If no race found, go back to training logic
+        print("[INFO] No race found. Returning to training logic.")
+        click(img="assets/buttons/back_btn.png", text="[INFO] Race not found. Proceeding to training.")
+        time.sleep(0.5)
+        # Re-evaluate training without race prioritization
+        best_training = do_something_fallback(results_training)
+        if best_training:
+          go_to_training()
+          time.sleep(0.5)
+          do_train(best_training)
+        else:
+          do_rest()
+    elif best_training:
       go_to_training()
       time.sleep(0.5)
       do_train(best_training)
