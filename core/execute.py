@@ -194,7 +194,7 @@ def race_prep():
   if view_result_btn:
     pyautogui.click(view_result_btn)
     time.sleep(0.5)
-    for i in range(5):
+    for i in range(4):
       pyautogui.tripleClick(interval=0.2)
       time.sleep(0.5)
 
