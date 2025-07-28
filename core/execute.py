@@ -4,7 +4,7 @@ import json
 
 pyautogui.useImageNotFoundException(False)
 
-from core.state import check_support_card, check_failure, check_turn, check_mood, check_current_year, check_criteria
+from core.state import check_support_card, check_failure, check_turn, check_mood, check_current_year, check_criteria, check_skill_points_cap
 from core.logic import do_something, do_something_fallback, all_training_unsafe, MAX_FAILURE
 from utils.constants import MOOD_LIST
 
@@ -111,7 +111,6 @@ def do_race(prioritize_g1 = False):
 
 def race_day():
   # Check skill points cap before race day (if enabled)
-  from core.state import check_skill_points_cap
   import json
   
   # Load config to check if skill point check is enabled
@@ -253,6 +252,20 @@ def career_lobby():
     # URA SCENARIO
     if year == "Finale Season" and turn == "Race Day":
       print("[INFO] URA Finale")
+      
+      # Check skill points cap before URA race day (if enabled)
+      import json
+      
+      # Load config to check if skill point check is enabled
+      with open("config.json", "r", encoding="utf-8") as file:
+        config = json.load(file)
+      
+      enable_skill_check = config.get("enable_skill_point_check", True)
+      
+      if enable_skill_check:
+        print("[INFO] URA Finale Race Day - Checking skill points cap...")
+        check_skill_points_cap()
+      
       ura()
       for i in range(2):
         if click(img="assets/buttons/race_btn.png", minSearch=2):
