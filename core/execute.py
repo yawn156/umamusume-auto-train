@@ -199,10 +199,10 @@ def race_prep():
       time.sleep(0.5)
 
 def after_race():
-  click(img="assets/buttons/next_btn.png", minSearch=6)
+  click(img="assets/buttons/next_btn.png", minSearch=15)
   time.sleep(0.5) # Raise a bit
   pyautogui.click()
-  click(img="assets/buttons/next2_btn.png", minSearch=6)
+  click(img="assets/buttons/next2_btn.png", minSearch=15)
 
 def career_lobby():
   # Program start
