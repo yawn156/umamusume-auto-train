@@ -194,15 +194,21 @@ def race_prep():
   if view_result_btn:
     pyautogui.click(view_result_btn)
     time.sleep(0.5)
-    for i in range(3):
+    for i in range(5): #Raise to repeat 5 times
       pyautogui.tripleClick(interval=0.2)
       time.sleep(0.5)
 
 def after_race():
-  click(img="assets/buttons/next_btn.png", minSearch=15)
-  time.sleep(0.5) # Raise a bit
+  # A lot of time to wait for the next button to appear
+  if not click(img="assets/buttons/next_btn.png", minSearch=30):
+    print("[ERROR] First next button not found after race")
+    return False
+  time.sleep(1.0) # Raise a bit
   pyautogui.click()
-  click(img="assets/buttons/next2_btn.png", minSearch=15)
+  if not click(img="assets/buttons/next2_btn.png", minSearch=30):
+    print("[ERROR] Second next button not found after race")
+    #
+    return False
 
 def career_lobby():
   # Program start
