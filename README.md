@@ -1,10 +1,8 @@
-# Umamusume Auto Train
-
-This is a fork from [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
-
+# Umamusume Auto Training Bot
+ 
 Like the title says, this is a simple auto training for Umamusume.
 
-This project is inspired by [shiokaze/UmamusumeAutoTrainer](https://github.com/shiokaze/UmamusumeAutoTrainer)
+This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
 
 [Demo video](https://youtu.be/CXSYVD-iMJk)
 
