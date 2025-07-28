@@ -151,6 +151,8 @@ When `prioritize_g1_race` is enabled:
 
 ### TODO
 
+- Add Race Stragety option (right now the only option is manually changing it)
+- Do race that doesn't have trophy yet
 - Auto-purchase skills (Partially implemented with skill point management)
 - Automate Claw Machine event
 - Improve OCR accuracy for failure chance detection
