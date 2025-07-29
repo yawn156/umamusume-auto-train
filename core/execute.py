@@ -288,8 +288,10 @@ def career_lobby():
       do_recreation()
       continue
 
-    # Check if goals is not met criteria AND it is not Pre-Debut AND turn is less than 10 AND Goal is already achieved
-    if criteria.split(" ")[0] != "criteria" and year != "Junior Year Pre-Debut" and turn < 10 and criteria != "Goal Achievedl":
+    # Check if goals criteria are NOT met AND it is not Pre-Debut AND turn is less than 10
+    # Prioritize racing when criteria are not met to help achieve goals
+    if (criteria.split(" ")[0] == "criteria" or "criteria met" in criteria.lower() or "goal achieved" in criteria.lower()) == False and year != "Junior Year Pre-Debut" and turn < 10:
+      print(f"[INFO] Criteria not met: '{criteria}'. Prioritizing racing to meet goals.")
       race_found = do_race()
       if race_found:
         continue

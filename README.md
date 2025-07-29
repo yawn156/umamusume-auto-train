@@ -25,6 +25,7 @@ This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.c
 ### Requirements
 
 - [Python 3.10+](https://www.python.org/downloads/)
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (for text recognition)
 
 ### Setup
 
@@ -38,6 +39,27 @@ git clone https://github.com/Kisegami/umamusume-auto-train/
 
 ```
 pip install -r requirements.txt
+```
+
+#### Install Tesseract OCR
+
+**Windows:**
+1. Download and install from [UB-Mannheim's Tesseract installer](https://github.com/UB-Mannheim/tesseract/wiki)
+2. Add Tesseract to your system PATH
+
+**macOS:**
+```bash
+brew install tesseract
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get install tesseract-ocr
+```
+
+**Linux (CentOS/RHEL):**
+```bash
+sudo yum install tesseract
 ```
 
 ### BEFORE YOU START
@@ -119,6 +141,41 @@ python main.py
 
 To stop the bot, just press `Ctrl + C` in your terminal, or move your mouse to the top-left corner of the screen.
 
+### Testing OCR Integration
+
+After installing Tesseract, you can test the OCR functionality using the provided test scripts:
+
+**Quick Test (Basic Verification):**
+```bash
+python test_ocr_quick.py
+```
+This quickly tests mood, turn, and year detection without capturing screenshots.
+
+**Capture Test (Screenshot Analysis):**
+```bash
+python test_ocr_capture.py
+```
+This captures screenshots of mood, turn, and year regions and saves them as PNG files for manual inspection.
+
+**Advanced Test (All Functions):**
+```bash
+python test_ocr_advanced.py
+```
+This tests all OCR functions including failure rate, stats, skill points, and criteria detection. It also performs consistency tests with multiple captures.
+
+The test scripts will help you:
+- Verify Tesseract is working correctly
+- Check if region coordinates are accurate
+- Assess OCR accuracy for different game elements
+- Debug any OCR-related issues
+
+**Note**: All test screenshots are saved in the `test_screenshots/` folder to keep the project root clean.
+
+**Cleanup**: To remove test screenshots, run:
+```bash
+python cleanup_test_screenshots.py
+```
+
 ### Training Logic
 
 The bot uses an improved training logic system:
@@ -140,7 +197,7 @@ When `prioritize_g1_race` is enabled:
 ### Known Issues
 
 - Some Uma that has special event/target goals (like Restricted Train Goldship or 2 G1 Race Oguri Cap) may not working. So please avoid using Goldship for training right now to keep your 12 million yen safe. For Oguri Cap, you can turn on Prioritize G1 race
-- OCR might misread failure chance (e.g., reads 33% as 3%) and proceeds with training anyway.
+- Tesseract OCR might misread failure chance (e.g., reads 33% as 3%) and proceeds with training anyway.
 - Sometimes it misdetects debuffs and clicks the infirmary unnecessarily (not a big deal).
 - Automatically picks the top option during chain events. Be careful with Acupuncture event, it always picks the top option.
 - If you bring a friend support card (like Tazuna/Aoi Kiryuin) and do recreation, the bot can't decide whether to date with the friend support card or the Uma.
@@ -153,7 +210,7 @@ When `prioritize_g1_race` is enabled:
 - Do race that doesn't have trophy yet
 - Auto-purchase skills (Partially implemented with skill point management)
 - Automate Claw Machine event
-- Improve OCR accuracy for failure chance detection
+- Improve Tesseract OCR accuracy for failure chance detection
 - Add consecutive races limit
 - Add auto retry for failed races
 - Add fans tracking/goal for Senior year (Valentine day, Fan Fest and Holiday Season)
