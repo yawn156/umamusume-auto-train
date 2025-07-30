@@ -55,13 +55,22 @@ def check_training():
       pyautogui.mouseDown()
       support_counts = check_support_card()
       total_support = sum(support_counts.values())
-      failure_chance = check_failure()
+      failure_result = check_failure()
+      
+      # Handle new tuple format (rate, confidence) or old format (rate)
+      if isinstance(failure_result, tuple):
+        failure_chance, confidence = failure_result
+      else:
+        failure_chance = failure_result
+        confidence = 0.0  # Default confidence for old format
+      
       results[key] = {
         "support": support_counts,
         "total_support": total_support,
-        "failure": failure_chance
+        "failure": failure_chance,
+        "confidence": confidence
       }
-      print(f"[{key.upper()}] → {support_counts}, Fail: {failure_chance}%")
+      print(f"[{key.upper()}] → {support_counts}, Fail: {failure_chance}% - Confident: {confidence:.2f}")
       time.sleep(0.1)
   
   pyautogui.mouseUp()
@@ -247,7 +256,29 @@ def career_lobby():
     print("\n=======================================================================================\n")
     print(f"Year: {year}")
     print(f"Mood: {mood}")
-    print(f"Turn: {turn}\n")
+    print(f"Turn: {turn}")
+    print(f"Goal: {criteria}")
+    
+    # Check if goals criteria are NOT met AND it is not Pre-Debut AND turn is less than 10
+    # Prioritize racing when criteria are not met to help achieve goals
+    criteria_met = (criteria.split(" ")[0] == "criteria" or "criteria met" in criteria.lower() or "goal achieved" in criteria.lower())
+    year_parts = year.split(" ")
+    is_junior_year = year_parts[0] == "Junior"
+    if not criteria_met and not is_junior_year and turn < 10:
+      print(f"Goal Status: Criteria not met - Prioritizing racing to meet goals")
+      race_found = do_race()
+      if race_found:
+        print("Race Result: Found Race")
+        continue
+      else:
+        print("Race Result: No Race Found")
+        # If there is no race matching to aptitude, go back and do training instead
+        click(img="assets/buttons/back_btn.png", text="[INFO] Race not found. Proceeding to training.")
+        time.sleep(0.5)
+    else:
+      print("Goal Status: Criteria met or conditions not suitable for racing")
+    
+    print("")
 
     # URA SCENARIO
     if year == "Finale Season" and turn == "Race Day":
@@ -288,25 +319,18 @@ def career_lobby():
       do_recreation()
       continue
 
-    # Check if goals criteria are NOT met AND it is not Pre-Debut AND turn is less than 10
-    # Prioritize racing when criteria are not met to help achieve goals
-    if (criteria.split(" ")[0] == "criteria" or "criteria met" in criteria.lower() or "goal achieved" in criteria.lower()) == False and year != "Junior Year Pre-Debut" and turn < 10:
-      print(f"[INFO] Criteria not met: '{criteria}'. Prioritizing racing to meet goals.")
-      race_found = do_race()
-      if race_found:
-        continue
-      else:
-        # If there is no race matching to aptitude, go back and do training instead
-        click(img="assets/buttons/back_btn.png", text="[INFO] Race not found. Proceeding to training.")
-        time.sleep(0.5)
+
 
     year_parts = year.split(" ")
     # If Prioritize G1 Race is true, check G1 race every turn
     if PRIORITIZE_G1_RACE and year_parts[0] != "Junior" and is_racing_available(year):
+      print("G1 Race Check: Looking for G1 race...")
       g1_race_found = do_race(PRIORITIZE_G1_RACE)
       if g1_race_found:
+        print("G1 Race Result: Found G1 Race")
         continue
       else:
+        print("G1 Race Result: No G1 Race Found")
         # If there is no G1 race, go back and do training
         click(img="assets/buttons/back_btn.png", text="[INFO] G1 race not found. Proceeding to training.")
         time.sleep(0.5)
@@ -322,6 +346,20 @@ def career_lobby():
     
     best_training = do_something(results_training)
     if best_training == "PRIORITIZE_RACE":
+      # Check if it's Junior Year - if so, don't prioritize racing
+      year_parts = year.split(" ")
+      if year_parts[0] == "Junior":
+        print("[INFO] Junior Year detected. Skipping race prioritization and proceeding to training.")
+        # Re-evaluate training without race prioritization
+        best_training = do_something_fallback(results_training)
+        if best_training:
+          go_to_training()
+          time.sleep(0.5)
+          do_train(best_training)
+        else:
+          do_rest()
+        continue
+      
       print("[INFO] Prioritizing race due to insufficient support cards.")
       
       # Check if all training options are unsafe before attempting race
@@ -336,10 +374,13 @@ def career_lobby():
         do_rest()
         continue
       
+      print("Training Race Check: Looking for race due to insufficient support cards...")
       race_found = do_race()
       if race_found:
+        print("Training Race Result: Found Race")
         continue
       else:
+        print("Training Race Result: No Race Found")
         # If no race found, go back to training logic
         print("[INFO] No race found. Returning to training logic.")
         click(img="assets/buttons/back_btn.png", text="[INFO] Race not found. Proceeding to training.")

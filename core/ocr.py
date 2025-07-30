@@ -33,7 +33,7 @@ def extract_text(pil_img: Image.Image) -> str:
             img_np = pil_img
             
         # Use Tesseract with custom configuration for better accuracy
-        config = '--oem 3 --psm 6 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%(). '
+        config = '--oem 3 --psm 6 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%().- '
         text = pytesseract.image_to_string(img_np, config=config, lang='eng')
         return text.strip()
     except Exception as e:
@@ -145,3 +145,36 @@ def extract_failure_text(pil_img: Image.Image) -> str:
     except Exception as e:
         print(f"[WARNING] Failure text extraction failed: {e}")
         return ""
+
+def extract_failure_text_with_confidence(pil_img: Image.Image) -> tuple[str, float]:
+    """Extract failure rate text with confidence score from Tesseract"""
+    try:
+        # Convert PIL image to numpy array if needed
+        if isinstance(pil_img, Image.Image):
+            img_np = np.array(pil_img)
+        else:
+            img_np = pil_img
+            
+        # Use Tesseract with data output to get confidence scores
+        config = '--oem 3 --psm 6 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%(). '
+        ocr_data = pytesseract.image_to_data(img_np, config=config, lang='eng', output_type=pytesseract.Output.DICT)
+        
+        # Extract text and calculate average confidence
+        text_parts = []
+        confidences = []
+        
+        for i, text in enumerate(ocr_data['text']):
+            if text.strip():  # Only consider non-empty text
+                text_parts.append(text)
+                confidences.append(ocr_data['conf'][i])
+        
+        if text_parts:
+            full_text = ' '.join(text_parts).strip()
+            avg_confidence = sum(confidences) / len(confidences) / 100.0  # Convert to 0-1 scale
+            return full_text, avg_confidence
+        else:
+            return "", 0.0
+            
+    except Exception as e:
+        print(f"[WARNING] Failure text extraction with confidence failed: {e}")
+        return "", 0.0

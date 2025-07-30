@@ -103,3 +103,56 @@ def enhanced_screenshot_for_failure(region=(0, 0, 1920, 1080)) -> Image.Image:
   pil_img = ImageEnhance.Contrast(pil_img).enhance(1.5)
   
   return pil_img
+
+def enhanced_screenshot_for_year(region=(0, 0, 1920, 1080)) -> Image.Image:
+  """Enhanced screenshot specifically optimized for year text with color (122, 65, 24)"""
+  with mss.mss() as sct:
+    monitor = {
+      "left": region[0],
+      "top": region[1],
+      "width": region[2],
+      "height": region[3]
+    }
+    img = sct.grab(monitor)
+    img_np = np.array(img)
+    img_rgb = img_np[:, :, :3][:, :, ::-1]
+    pil_img = Image.fromarray(img_rgb)
+
+  # Resize for better OCR
+  pil_img = pil_img.resize((pil_img.width * 2, pil_img.height * 2), Image.BICUBIC)
+  
+  # Convert to RGB to work with color channels
+  pil_img = pil_img.convert("RGB")
+  
+  # Convert to numpy for color processing
+  img_np = np.array(pil_img)
+  
+  # Target color: (122, 65, 24) - brown/orange text
+  target_r, target_g, target_b = 122, 65, 24
+  
+  # Create color tolerance for better matching
+  tolerance = 30
+  
+  # Create mask for the target color with tolerance
+  color_mask = (
+    (img_np[:, :, 0] >= target_r - tolerance) & (img_np[:, :, 0] <= target_r + tolerance) &
+    (img_np[:, :, 1] >= target_g - tolerance) & (img_np[:, :, 1] <= target_g + tolerance) &
+    (img_np[:, :, 2] >= target_b - tolerance) & (img_np[:, :, 2] <= target_b + tolerance)
+  )
+  
+  # Create a new image: black background, white text
+  result = np.zeros_like(img_np)
+  
+  # Set target color text to white for better OCR
+  result[color_mask] = [255, 255, 255]
+  
+  # Convert back to PIL
+  pil_img = Image.fromarray(result)
+  
+  # Convert to grayscale for OCR
+  pil_img = pil_img.convert("L")
+  
+  # Enhance contrast for better OCR
+  pil_img = ImageEnhance.Contrast(pil_img).enhance(2.0)
+  
+  return pil_img

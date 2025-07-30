@@ -1,8 +1,9 @@
 import re
+import time
 
 from PIL import Image, ImageEnhance
 from utils.screenshot import capture_region, enhanced_screenshot, enhanced_screenshot_for_failure
-from core.ocr import extract_text, extract_number, extract_turn_number, extract_mood_text, extract_failure_text
+from core.ocr import extract_text, extract_number, extract_turn_number, extract_mood_text, extract_failure_text, extract_failure_text_with_confidence
 from core.recognizer import match_template
 
 from utils.constants import SUPPORT_CARD_ICON_REGION, MOOD_REGION, TURN_REGION, FAILURE_REGION, YEAR_REGION, MOOD_LIST, CRITERIA_REGION
@@ -69,7 +70,7 @@ def check_failure():
       time.sleep(1)
   
   if not has_failure:
-    return -1
+    return (-1, 0.0)  # 0% confidence when no failure text detected
 
   # Find the bounding box of "Failure" text using OCR data
   try:
@@ -105,89 +106,81 @@ def check_failure():
       crop_coords = (left, top, left + width, top + height)
       percentage_img = failure.crop(crop_coords)
       
-      # Try normal OCR first (up to 3 attempts)
-      for ocr_attempt in range(3):
-        # Extract text from the focused region
-        percentage_text = extract_failure_text(percentage_img)
-        if not percentage_text:
-          percentage_text = extract_text(percentage_img)
+      # Try normal OCR with confidence
+      percentage_text, confidence = extract_failure_text_with_confidence(percentage_img)
+      if not percentage_text:
+        percentage_text, confidence = extract_text(percentage_img), 0.0
+      
+      # Extract percentage from the focused text
+      percentage_patterns = [
+        r"(\d{1,3})\s*%",  # "29%", "29 %"
+        r"(\d{1,3})",      # Just the number
+      ]
+      
+      for pattern in percentage_patterns:
+        match = re.search(pattern, percentage_text)
+        if match:
+          rate = int(match.group(1))
+          # Validate reasonable range (0-100)
+          if 0 <= rate <= 100:
+            return (rate, confidence)
         
-        # Extract percentage from the focused text
-        percentage_patterns = [
-          r"(\d{1,3})\s*%",  # "29%", "29 %"
-          r"(\d{1,3})",      # Just the number
-        ]
+        # If no percentage found, try yellow threshold
+        print("[INFO] Normal OCR failed, trying yellow threshold detection...")
         
+        # Get the raw screenshot for yellow threshold processing
+        import mss
+        with mss.mss() as sct:
+          monitor = {
+            "left": FAILURE_REGION[0],
+            "top": FAILURE_REGION[1],
+            "width": FAILURE_REGION[2],
+            "height": FAILURE_REGION[3]
+          }
+          raw_img = sct.grab(monitor)
+          raw_np = np.array(raw_img)
+          raw_rgb = raw_np[:, :, :3][:, :, ::-1]
+          raw_pil = Image.fromarray(raw_rgb)
+        
+        # Resize and convert to RGB
+        raw_pil = raw_pil.resize((raw_pil.width * 2, raw_pil.height * 2), Image.BICUBIC)
+        raw_pil = raw_pil.convert("RGB")
+        raw_np = np.array(raw_pil)
+        
+        # Apply yellow threshold (using the working "More permissive" threshold)
+        yellow_mask = (
+          (raw_np[:, :, 0] > 180) &  # High red
+          (raw_np[:, :, 1] > 120) &  # High green
+          (raw_np[:, :, 2] < 80)     # Low blue
+        )
+        
+        # Create yellow-specialized image
+        yellow_result = np.zeros_like(raw_np)
+        yellow_result[yellow_mask] = [255, 255, 255]  # Yellow text -> white
+        
+        # Convert to PIL and process
+        yellow_img = Image.fromarray(yellow_result)
+        yellow_img = yellow_img.convert("L")
+        yellow_img = ImageEnhance.Contrast(yellow_img).enhance(1.5)
+        
+        # Crop the same focused region from yellow image
+        yellow_cropped = yellow_img.crop(crop_coords)
+        
+        # Try OCR on yellow-specialized image with confidence
+        yellow_text, yellow_confidence = extract_failure_text_with_confidence(yellow_cropped)
+        if not yellow_text:
+          yellow_text, yellow_confidence = extract_text(yellow_cropped), 0.0
+        
+        # Extract percentage from yellow text
         for pattern in percentage_patterns:
-          match = re.search(pattern, percentage_text)
+          match = re.search(pattern, yellow_text)
           if match:
             rate = int(match.group(1))
-            # Validate reasonable range (0-100)
             if 0 <= rate <= 100:
-              return rate
+              print(f"[INFO] Found percentage {rate}% using yellow threshold detection")
+              return (rate, yellow_confidence)
         
-        # If no percentage found and this is the last OCR attempt, try yellow threshold
-        if ocr_attempt == 2:  # After 3 failed attempts
-          print("[INFO] Normal OCR failed, trying yellow threshold detection...")
-          
-          # Get the raw screenshot for yellow threshold processing
-          import mss
-          with mss.mss() as sct:
-            monitor = {
-              "left": FAILURE_REGION[0],
-              "top": FAILURE_REGION[1],
-              "width": FAILURE_REGION[2],
-              "height": FAILURE_REGION[3]
-            }
-            raw_img = sct.grab(monitor)
-            raw_np = np.array(raw_img)
-            raw_rgb = raw_np[:, :, :3][:, :, ::-1]
-            raw_pil = Image.fromarray(raw_rgb)
-          
-          # Resize and convert to RGB
-          raw_pil = raw_pil.resize((raw_pil.width * 2, raw_pil.height * 2), Image.BICUBIC)
-          raw_pil = raw_pil.convert("RGB")
-          raw_np = np.array(raw_pil)
-          
-          # Apply yellow threshold (using the working "More permissive" threshold)
-          yellow_mask = (
-            (raw_np[:, :, 0] > 180) &  # High red
-            (raw_np[:, :, 1] > 120) &  # High green
-            (raw_np[:, :, 2] < 80)     # Low blue
-          )
-          
-          # Create yellow-specialized image
-          yellow_result = np.zeros_like(raw_np)
-          yellow_result[yellow_mask] = [255, 255, 255]  # Yellow text -> white
-          
-          # Convert to PIL and process
-          yellow_img = Image.fromarray(yellow_result)
-          yellow_img = yellow_img.convert("L")
-          yellow_img = ImageEnhance.Contrast(yellow_img).enhance(1.5)
-          
-          # Crop the same focused region from yellow image
-          yellow_cropped = yellow_img.crop(crop_coords)
-          
-          # Try OCR on yellow-specialized image
-          yellow_text = extract_failure_text(yellow_cropped)
-          if not yellow_text:
-            yellow_text = extract_text(yellow_cropped)
-          
-          # Extract percentage from yellow text
-          for pattern in percentage_patterns:
-            match = re.search(pattern, yellow_text)
-            if match:
-              rate = int(match.group(1))
-              if 0 <= rate <= 100:
-                print(f"[INFO] Found percentage {rate}% using yellow threshold detection")
-                return rate
-          
-          print("[WARNING] Yellow threshold detection also failed")
-        
-        # Wait a bit before next attempt
-        if ocr_attempt < 2:
-          import time
-          time.sleep(0.5)
+        print("[WARNING] Yellow threshold detection also failed")
     
     # Fallback: if we can't find the exact bounding box, use the heuristic approach
     x, y, width, height = FAILURE_REGION
@@ -196,9 +189,9 @@ def check_failure():
     focused_region = (x, focused_y, width, focused_height)
     
     percentage_img = enhanced_screenshot(focused_region)
-    percentage_text = extract_failure_text(percentage_img)
+    percentage_text, confidence = extract_failure_text_with_confidence(percentage_img)
     if not percentage_text:
-      percentage_text = extract_text(percentage_img)
+      percentage_text, confidence = extract_text(percentage_img), 0.0
     
     percentage_patterns = [
       r"(\d{1,3})\s*%",  # "29%", "29 %"
@@ -210,7 +203,7 @@ def check_failure():
       if match:
         rate = int(match.group(1))
         if 0 <= rate <= 100:
-          return rate
+          return (rate, confidence)
   
   except Exception as e:
     # If OCR data extraction fails, fall back to heuristic approach
@@ -220,9 +213,9 @@ def check_failure():
     focused_region = (x, focused_y, width, focused_height)
     
     percentage_img = enhanced_screenshot(focused_region)
-    percentage_text = extract_failure_text(percentage_img)
+    percentage_text, confidence = extract_failure_text_with_confidence(percentage_img)
     if not percentage_text:
-      percentage_text = extract_text(percentage_img)
+      percentage_text, confidence = extract_text(percentage_img), 0.0
     
     percentage_patterns = [
       r"(\d{1,3})\s*%",  # "29%", "29 %"
@@ -234,28 +227,36 @@ def check_failure():
       if match:
         rate = int(match.group(1))
         if 0 <= rate <= 100:
-          return rate
+          return (rate, confidence)
 
-  return -1
+  return (-1, 0.0)  # 0% confidence when detection fails
 
 # Check mood
 def check_mood():
-  mood = enhanced_screenshot(MOOD_REGION)
-  
-  # First try specialized mood text extraction
-  mood_text = extract_mood_text(mood).upper()
-  if mood_text:
+  # Try up to 3 times to detect mood
+  for attempt in range(3):
+    mood = enhanced_screenshot(MOOD_REGION)
+    
+    # First try specialized mood text extraction
+    mood_text = extract_mood_text(mood).upper()
+    if mood_text:
+      for known_mood in MOOD_LIST:
+        if known_mood in mood_text:
+          return known_mood
+    
+    # Fallback to general text extraction
+    mood_text = extract_text(mood).upper()
     for known_mood in MOOD_LIST:
       if known_mood in mood_text:
         return known_mood
-  
-  # Fallback to general text extraction
-  mood_text = extract_text(mood).upper()
-  for known_mood in MOOD_LIST:
-    if known_mood in mood_text:
-      return known_mood
 
-  print(f"[WARNING] Mood not recognized: {mood_text}")
+    # If this is not the last attempt, wait a bit and try again
+    if attempt < 2:
+      print(f"[WARNING] Mood not recognized on attempt {attempt + 1}/3: {mood_text}. Retrying...")
+      time.sleep(0.5)  # Wait 0.5 seconds before retry
+    else:
+      print(f"[WARNING] Mood not recognized after 3 attempts: {mood_text}")
+  
   return "UNKNOWN"
 
 # Check turn
@@ -301,8 +302,14 @@ def check_turn():
 
 # Check year
 def check_current_year():
-  year = enhanced_screenshot(YEAR_REGION)
-  text = extract_text(year)
+  from utils.screenshot import enhanced_screenshot_for_year
+  year = enhanced_screenshot_for_year(YEAR_REGION)
+  
+  # Use PSM 6 with whitelist for year text recognition (only letters, hyphens, spaces)
+  import pytesseract
+  
+  text = pytesseract.image_to_string(year, config='--oem 3 --psm 6 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz- ')
+  text = text.strip() if text else ""
   
   if not text:
     return ""
@@ -315,37 +322,28 @@ def check_current_year():
   # Look for common year patterns and cut off after them
   import re
   
-  # Split by whitespace and take only the first few words that look like year text
-  words = text.split()
+  # Handle the case where OCR returns concatenated text like "JuniorYearPre-Debut"
+  # Split by capital letters to separate words
+  import re
+  
+  # Split by capital letters but preserve the capital letter
+  words = re.findall(r'[A-Z][a-z]*', text)
+  
+  # Handle special cases like "Pre-Debut" that might be split incorrectly
   clean_words = []
-  
-  # Common OCR artifacts to filter out
-  ocr_artifacts = ["Py", "Ko", "O", "A", "I", "U", "E"]
-  
-  for word in words:
-    # Check if word looks like a year word (starts with uppercase, contains letters)
-    # Skip single lowercase letters and common OCR artifacts
-    if word and word.isalpha():
-      if word[0].isupper() and len(word) > 1 and word not in ocr_artifacts:  # Only keep proper words starting with uppercase
-        clean_words.append(word)
-      elif len(word) == 1 and word.islower():  # Skip single lowercase letters
-        continue
-      else:
-        # Stop when we hit non-year text
-        break
+  i = 0
+  while i < len(words):
+    word = words[i]
+    
+    # Check if next word is "Debut" and current word is "Pre" (handle "Pre-Debut")
+    if word == "Pre" and i + 1 < len(words) and words[i + 1] == "Debut":
+      clean_words.append("Pre-Debut")
+      i += 2  # Skip both words
+    else:
+      clean_words.append(word)
+      i += 1
   
   text = ' '.join(clean_words)
-  
-  # Add spaces before uppercase letters (except first letter)
-  if text:
-    result = text[0]  # Keep first letter as is
-    for char in text[1:]:
-      if char.isupper():
-        result += ' ' + char
-      else:
-        result += char
-    return result
-  
   return text
 
 # Check criteria
