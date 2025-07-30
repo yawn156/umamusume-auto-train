@@ -1,10 +1,8 @@
-# Umamusume Auto Train
-
-This is a fork from [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
-
+# Umamusume Auto Training Bot
+ 
 Like the title says, this is a simple auto training for Umamusume.
 
-This project is inspired by [shiokaze/UmamusumeAutoTrainer](https://github.com/shiokaze/UmamusumeAutoTrainer)
+This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
 
 [Demo video](https://youtu.be/CXSYVD-iMJk)
 
@@ -27,19 +25,41 @@ This project is inspired by [shiokaze/UmamusumeAutoTrainer](https://github.com/s
 ### Requirements
 
 - [Python 3.10+](https://www.python.org/downloads/)
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (for text recognition)
 
 ### Setup
 
 #### Clone repository
 
 ```
-git clone https://github.com/samsulpanjul/umamusume-auto-train.git
+git clone https://github.com/Kisegami/umamusume-auto-train/
 ```
 
 #### Install dependencies
 
 ```
 pip install -r requirements.txt
+```
+
+#### Install Tesseract OCR
+
+**Windows:**
+1. Download and install from [UB-Mannheim's Tesseract installer](https://github.com/UB-Mannheim/tesseract/wiki)
+2. Add Tesseract to your system PATH
+
+**macOS:**
+```bash
+brew install tesseract
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get install tesseract-ocr
+```
+
+**Linux (CentOS/RHEL):**
+```bash
+sudo yum install tesseract
 ```
 
 ### BEFORE YOU START
@@ -142,7 +162,7 @@ When `prioritize_g1_race` is enabled:
 ### Known Issues
 
 - Some Uma that has special event/target goals (like Restricted Train Goldship or 2 G1 Race Oguri Cap) may not working. So please avoid using Goldship for training right now to keep your 12 million yen safe. For Oguri Cap, you can turn on Prioritize G1 race
-- OCR might misread failure chance (e.g., reads 33% as 3%) and proceeds with training anyway.
+- Tesseract OCR might misread failure chance (e.g., reads 33% as 3%) and proceeds with training anyway.
 - Sometimes it misdetects debuffs and clicks the infirmary unnecessarily (not a big deal).
 - Automatically picks the top option during chain events. Be careful with Acupuncture event, it always picks the top option.
 - If you bring a friend support card (like Tazuna/Aoi Kiryuin) and do recreation, the bot can't decide whether to date with the friend support card or the Uma.
@@ -155,7 +175,7 @@ When `prioritize_g1_race` is enabled:
 - Do race that doesn't have trophy yet
 - Auto-purchase skills (Partially implemented with skill point management)
 - Automate Claw Machine event
-- Improve OCR accuracy for failure chance detection
+- Improve Tesseract OCR accuracy for failure chance detection
 - Add consecutive races limit
 - Add auto retry for failed races
 - Add fans tracking/goal for Senior year (Valentine day, Fan Fest and Holiday Season)
