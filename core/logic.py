@@ -9,6 +9,7 @@ PRIORITY_STAT = config["priority_stat"]
 MAX_FAILURE = config["maximum_failure"]
 STAT_CAPS = config["stat_caps"]
 MIN_SUPPORT = config.get("min_support", 2)
+MIN_CONFIDENCE = 0.5  # Minimum confidence threshold for training decisions (currently used for retry logic)
 
 # Get priority stat from config
 def get_stat_priority(stat_key: str) -> int:

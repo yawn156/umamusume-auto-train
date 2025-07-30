@@ -55,14 +55,41 @@ def check_training():
       pyautogui.mouseDown()
       support_counts = check_support_card()
       total_support = sum(support_counts.values())
-      failure_result = check_failure()
       
-      # Handle new tuple format (rate, confidence) or old format (rate)
-      if isinstance(failure_result, tuple):
-        failure_chance, confidence = failure_result
+      # Retry failure detection if confidence is low
+      max_retries = 3
+      best_confidence = 0.0
+      best_failure_result = None
+      
+      for attempt in range(max_retries):
+        failure_result = check_failure()
+        
+        # Handle new tuple format (rate, confidence) or old format (rate)
+        if isinstance(failure_result, tuple):
+          failure_chance, confidence = failure_result
+        else:
+          failure_chance = failure_result
+          confidence = 0.0  # Default confidence for old format
+        
+        # Keep the best result (highest confidence)
+        if confidence > best_confidence:
+          best_confidence = confidence
+          best_failure_result = failure_result
+        
+        # If we have good confidence, no need to retry
+        if confidence >= 0.5:
+          break
+        
+        # Wait a bit before retry
+        if attempt < max_retries - 1:
+          time.sleep(0.2)
+      
+      # Use the best result we found
+      if isinstance(best_failure_result, tuple):
+        failure_chance, confidence = best_failure_result
       else:
-        failure_chance = failure_result
-        confidence = 0.0  # Default confidence for old format
+        failure_chance = best_failure_result
+        confidence = best_confidence
       
       results[key] = {
         "support": support_counts,
@@ -70,7 +97,9 @@ def check_training():
         "failure": failure_chance,
         "confidence": confidence
       }
-      print(f"[{key.upper()}] → {support_counts}, Fail: {failure_chance}% - Confident: {confidence:.2f}")
+      
+      retry_info = f" (retried {max_retries} times)" if best_confidence < 0.5 else ""
+      print(f"[{key.upper()}] → {support_counts}, Fail: {failure_chance}% - Confident: {confidence:.2f}{retry_info}")
       time.sleep(0.1)
   
   pyautogui.mouseUp()
@@ -350,6 +379,19 @@ def career_lobby():
       year_parts = year.split(" ")
       if year_parts[0] == "Junior":
         print("[INFO] Junior Year detected. Skipping race prioritization and proceeding to training.")
+        # Re-evaluate training without race prioritization
+        best_training = do_something_fallback(results_training)
+        if best_training:
+          go_to_training()
+          time.sleep(0.5)
+          do_train(best_training)
+        else:
+          do_rest()
+        continue
+      
+      # Check if it's Finale Season - no races available, fall back to training without min_support
+      if year == "Finale Season":
+        print("[INFO] Finale Season detected. No races available. Proceeding to training without minimum support requirements.")
         # Re-evaluate training without race prioritization
         best_training = do_something_fallback(results_training)
         if best_training:
