@@ -141,41 +141,6 @@ python main.py
 
 To stop the bot, just press `Ctrl + C` in your terminal, or move your mouse to the top-left corner of the screen.
 
-### Testing OCR Integration
-
-After installing Tesseract, you can test the OCR functionality using the provided test scripts:
-
-**Quick Test (Basic Verification):**
-```bash
-python test_ocr_quick.py
-```
-This quickly tests mood, turn, and year detection without capturing screenshots.
-
-**Capture Test (Screenshot Analysis):**
-```bash
-python test_ocr_capture.py
-```
-This captures screenshots of mood, turn, and year regions and saves them as PNG files for manual inspection.
-
-**Advanced Test (All Functions):**
-```bash
-python test_ocr_advanced.py
-```
-This tests all OCR functions including failure rate, stats, skill points, and criteria detection. It also performs consistency tests with multiple captures.
-
-The test scripts will help you:
-- Verify Tesseract is working correctly
-- Check if region coordinates are accurate
-- Assess OCR accuracy for different game elements
-- Debug any OCR-related issues
-
-**Note**: All test screenshots are saved in the `test_screenshots/` folder to keep the project root clean.
-
-**Cleanup**: To remove test screenshots, run:
-```bash
-python cleanup_test_screenshots.py
-```
-
 ### Training Logic
 
 The bot uses an improved training logic system:
