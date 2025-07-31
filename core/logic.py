@@ -8,7 +8,8 @@ with open("config.json", "r", encoding="utf-8") as file:
 PRIORITY_STAT = config["priority_stat"]
 MAX_FAILURE = config["maximum_failure"]
 STAT_CAPS = config["stat_caps"]
-MIN_SUPPORT = config.get("min_support", 2)
+MIN_SUPPORT = config.get("min_support", 0)
+DO_RACE_WHEN_BAD_TRAINING = config.get("do_race_when_bad_training", True)
 MIN_CONFIDENCE = 0.5  # Minimum confidence threshold for training decisions (currently used for retry logic)
 
 # Get priority stat from config
@@ -18,11 +19,13 @@ def get_stat_priority(stat_key: str) -> int:
 # Check if any training has enough support cards
 def has_sufficient_support(results):
   for stat, data in results.items():
-    if int(data["failure"]) <= MAX_FAILURE and data["total_support"] >= MIN_SUPPORT:
-      # Special handling for WIT - requires at least 2 support cards
-      if stat == "wit" and data["total_support"] >= 2:
-        return True
-      elif stat != "wit":
+    if int(data["failure"]) <= MAX_FAILURE:
+      # Special handling for WIT - requires at least 2 support cards regardless of MIN_SUPPORT
+      if stat == "wit":
+        if data["total_support"] >= 2:
+          return True
+      # For non-WIT stats, check against MIN_SUPPORT
+      elif data["total_support"] >= MIN_SUPPORT:
         return True
   return False
 
@@ -55,6 +58,11 @@ def most_support_card(results):
   filtered_results = {
     k: v for k, v in results.items() if int(v["failure"]) <= MAX_FAILURE
   }
+  
+  # Remove WIT if it doesn't have enough support cards
+  if "wit" in filtered_results and filtered_results["wit"]["total_support"] < 2:
+    print(f"\n[INFO] WIT has only {filtered_results['wit']['total_support']} support cards. Excluding from consideration.")
+    del filtered_results["wit"]
 
   if not filtered_results:
     print("\n[INFO] No safe training found. All failure chances are too high.")
@@ -71,16 +79,13 @@ def most_support_card(results):
 
   best_key, best_data = best_training
 
-  if best_data["total_support"] <= 1:
+  # Skip MIN_SUPPORT check if do_race_when_bad_training is disabled
+  if DO_RACE_WHEN_BAD_TRAINING and best_data["total_support"] < MIN_SUPPORT:
     if int(best_data["failure"]) == 0:
-      # WIT must be at least 2 support cards
-      if best_key == "wit":
-        print(f"\n[INFO] Only 1 support and it's WIT. Skipping.")
-        return None
-      print(f"\n[INFO] Only 1 support but 0% failure. Prioritizing based on priority list: {best_key.upper()}")
+      print(f"\n[INFO] Only {best_data['total_support']} support but 0% failure. Prioritizing based on priority list: {best_key.upper()}")
       return best_key
     else:
-      print("\n[INFO] Low value training (only 1 support). Choosing to rest.")
+      print(f"\n[INFO] Low value training (only {best_data['total_support']} support). Choosing to rest.")
       return None
 
   print(f"\nBest training: {best_key.upper()} with {best_data['total_support']} support cards and {best_data['failure']}% fail chance")
@@ -135,10 +140,14 @@ def do_something(results):
     result = rainbow_training(filtered)
     if result is None:
       print("[INFO] Falling back to most_support_card because rainbow not available.")
-      # Check if any training has sufficient support cards
-      if not has_sufficient_support(filtered):
-        print(f"\n[INFO] No training has >= {MIN_SUPPORT} support cards. Prioritizing race instead.")
-        return "PRIORITIZE_RACE"
+      # Check if any training has sufficient support cards (only when do_race_when_bad_training is true)
+      if DO_RACE_WHEN_BAD_TRAINING:
+        if not has_sufficient_support(filtered):
+          print(f"\n[INFO] No training has sufficient support cards (min: {MIN_SUPPORT}) or safe failure rates (max: {MAX_FAILURE}%). Prioritizing race instead.")
+          return "PRIORITIZE_RACE"
+      else:
+        print(f"\n[INFO] do_race_when_bad_training is disabled. Skipping support card requirements and proceeding with training.")
+      
       return most_support_card(filtered)
   return result
 
