@@ -134,7 +134,7 @@ def do_something(results):
     print("[INFO] All stats capped or no valid training.")
     return None
 
-  if "Junior Year" in year:
+  if "Pre-Debut" in year:
     return most_support_card(filtered)
   else:
     result = rainbow_training(filtered)
@@ -163,7 +163,7 @@ def do_something_fallback(results):
     print("[INFO] All stats capped or no valid training.")
     return None
 
-  if "Junior Year" in year:
+  if "Pre-Debut" in year:
     return most_support_card(filtered)
   else:
     result = rainbow_training(filtered)
