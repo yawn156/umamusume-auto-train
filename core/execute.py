@@ -234,12 +234,18 @@ def race_prep():
   if view_result_btn:
     pyautogui.click(view_result_btn)
     time.sleep(0.5)
-    for i in range(4):
+    for i in range(3):
       pyautogui.tripleClick(interval=0.2)
       time.sleep(0.5)
 
 def after_race():
-  click(img="assets/buttons/next_btn.png", minSearch=10)
+  # Try to click next_btn.png, if not found, click at (185, 900) and wait for it to appear
+  if not click(img="assets/buttons/next_btn.png", minSearch=10):
+    print("[INFO] next_btn.png not found, clicking at (185, 900) and waiting...")
+    pyautogui.click(185, 900)
+    time.sleep(1)  # Wait a bit for the button to appear
+    click(img="assets/buttons/next_btn.png", minSearch=10)
+  
   time.sleep(0.5) # Raise a bit
   pyautogui.click()
   click(img="assets/buttons/next2_btn.png", minSearch=10)
