@@ -19,6 +19,7 @@ This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.c
 - Stat caps to prevent overtraining specific stats
 - Improved training logic with better support card handling
 - Minimum support card requirements for training (Read Logic)
+- **Intelligent Event Choice Selection**: Automatically analyzes event options and selects the best choice based on configured priorities
 
 ## Getting Started
 
@@ -46,21 +47,6 @@ pip install -r requirements.txt
 **Windows:**
 1. Download and install from [UB-Mannheim's Tesseract installer](https://github.com/UB-Mannheim/tesseract/wiki)
 2. Add Tesseract to your system PATH
-
-**macOS:**
-```bash
-brew install tesseract
-```
-
-**Linux (Ubuntu/Debian):**
-```bash
-sudo apt-get install tesseract-ocr
-```
-
-**Linux (CentOS/RHEL):**
-```bash
-sudo yum install tesseract
-```
 
 ### BEFORE YOU START
 
@@ -139,6 +125,78 @@ You can edit your configuration in `config.json`
 
 Make sure the values match exactly as expected, typos might cause errors.
 
+### Event Choice Configuration
+
+The bot now includes intelligent event choice selection. You can configure which choices are considered "good" or "bad" in `event_priority.json`:
+
+```json
+{
+  "Good_choices": [
+    "Charming",
+    "Fast Learner", 
+    "Hot Topic",
+    "Practice Perfect",
+    "Energy +",
+    "hint +",
+    "Speed +",
+    "Stamina +",
+    "Yayoi Akikawa bond +",
+    "Power +",
+    "Wisdom +",
+    "Skill points +",
+    "Mood +",
+    "bond +",
+    "stat +",
+    "stats +",
+    "Guts +",
+    "Japanese Oaks"
+  ],
+  "Bad_choices": [
+    "Practice Poor",
+    "Slacker",
+    "Slow Metabolism", 
+    "Mood -",
+    "Gatekept"
+  ]
+}
+```
+
+#### Customizing Event Priorities
+
+If you want to customize the event priorities beyond the default configuration, you can reference `all_unique_event_outcomes.json` which contains all possible event outcomes in the game until 08/2025. This file serves as a comprehensive reference for:
+
+- **All possible stat gains** (Speed +10, Stamina +15, etc.)
+- **All skill hints** (various skill names with hint bonuses)
+- **All support card bond changes** (character names with bond +5/-5)
+- **All conditions** (Charming, Hot Topic, Practice Perfect, etc.)
+- **All energy changes** (Energy +10, Energy -15, etc.)
+- **All mood changes** (Mood +1, Mood -1, etc.)
+
+Use this file to discover new event outcomes you might want to add to your `Good_choices` or `Bad_choices` arrays in `event_priority.json`. For example, if you find a specific skill hint or support card bond change you want to prioritize, you can copy the exact text from `all_unique_event_outcomes.json` and add it to your configuration.
+
+#### Event Choice Selection Logic
+
+The bot automatically selects the best event choice based on your configured priorities:
+
+1. **Priority Analysis**: Chooses options with the highest priority good choices first
+2. **Tie-Breaking**: When multiple options have the same good choice:
+   - Prefers options with fewer bad choices
+   - If still tied, prefers options with more good choices
+   - If still tied, defaults to the top choice
+3. **Fallback**: For unknown events or analysis failures, defaults to the first choice
+
+#### Event Priority Configuration
+
+`Good_choices` (array of strings)
+- List of positive effects that should be prioritized
+- The bot will prefer choices containing these terms
+- Order matters: earlier items have higher priority
+
+`Bad_choices` (array of strings)
+- List of negative effects to avoid
+- The bot will prefer choices with fewer of these effects
+- Used for tie-breaking when multiple options have the same good choices
+
 ### Start
 
 ```
@@ -170,7 +228,6 @@ When `prioritize_g1_race` is enabled:
 - Some Uma that has special event/target goals (like Restricted Train Goldship or 2 G1 Race Oguri Cap) may not working. So please avoid using Goldship for training right now to keep your 12 million yen safe. For Oguri Cap, you can turn on Prioritize G1 race
 - Tesseract OCR might misread failure chance (e.g., reads 33% as 3%) and proceeds with training anyway.
 - Sometimes it misdetects debuffs and clicks the infirmary unnecessarily (not a big deal).
-- Automatically picks the top option during chain events. Be careful with Acupuncture event, it always picks the top option.
 - If you bring a friend support card (like Tazuna/Aoi Kiryuin) and do recreation, the bot can't decide whether to date with the friend support card or the Uma.
 - The bot will skip "3 consecutive races warning" prompt for now
 - The bot stuck when "Crietia not meet" prompt appear
@@ -186,7 +243,7 @@ When `prioritize_g1_race` is enabled:
 - Add auto retry for failed races
 - Add fans tracking/goal for Senior year (Valentine day, Fan Fest and Holiday Season)
 - Add option to do race in Summer (July - August)
-- Add better event options handling
+- ~Add better event options handling~ (✅ **COMPLETED** - Intelligent event choice selection implemented)
 
 
 
