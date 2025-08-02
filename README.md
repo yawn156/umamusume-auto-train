@@ -209,7 +209,6 @@ When `prioritize_g1_race` is enabled:
 - Some Uma that has special event/target goals (like Restricted Train Goldship or 2 G1 Race Oguri Cap) may not working. So please avoid using Goldship for training right now to keep your 12 million yen safe. For Oguri Cap, you can turn on Prioritize G1 race
 - Tesseract OCR might misread failure chance (e.g., reads 33% as 3%) and proceeds with training anyway.
 - Sometimes it misdetects debuffs and clicks the infirmary unnecessarily (not a big deal).
-- **Event Handling**: The bot now intelligently analyzes event choices and selects the best option based on your configured priorities. Unknown events default to the first choice.
 - If you bring a friend support card (like Tazuna/Aoi Kiryuin) and do recreation, the bot can't decide whether to date with the friend support card or the Uma.
 - The bot will skip "3 consecutive races warning" prompt for now
 - The bot stuck when "Crietia not meet" prompt appear
@@ -225,7 +224,7 @@ When `prioritize_g1_race` is enabled:
 - Add auto retry for failed races
 - Add fans tracking/goal for Senior year (Valentine day, Fan Fest and Holiday Season)
 - Add option to do race in Summer (July - August)
-- Add better event options handling (✅ **COMPLETED** - Intelligent event choice selection implemented)
+- ~Add better event options handling~ (✅ **COMPLETED** - Intelligent event choice selection implemented)
 
 
 
