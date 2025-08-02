@@ -70,7 +70,8 @@ You can edit your configuration in `config.json`
   "prioritize_g1_race": true,
   "skill_point_cap": 400,
   "enable_skill_point_check": true,
-  "min_support": 3,
+  "min_support": 0,
+  "do_race_when_bad_training": true,
   "stat_caps": {
     "spd": 1100,
     "sta": 1100,
@@ -108,10 +109,15 @@ You can edit your configuration in `config.json`
 - Enables/disables the skill point cap checking feature.
 
 `min_support` (integer) - 
-- Minimum number of support cards required for training (default: 3).
+- Minimum number of support cards required for training (default: 0).
 - If no training meet the requirement, the bot will do race instead.
 - WIT training requires at least 2 support cards regardless of this setting.
 - If you want to turn this off, set it to 0
+
+`do_race_when_bad_training` (boolean) - 
+- If `true`, the bot will prioritize racing when no training meets the requirements (insufficient support cards, high failure rates, etc.).
+- If `false`, the bot will skip support card requirements and train regardless of `min_support` setting (as long as failure rates are acceptable).
+- Default: `true`
 
 `stat_caps` (object) - 
 - Maximum values for each stat. The bot will skip training stats that have reached their cap.
