@@ -10,6 +10,9 @@ from utils.constants import MOOD_LIST
 
 def is_racing_available(year):
   """Check if racing is available based on the current year/month"""
+  # No races in Pre-Debut
+  if "Pre-Debut" in year:
+    return False
   year_parts = year.split(" ")
   # No races in July and August (summer break)
   if len(year_parts) > 3 and year_parts[3] in ["Jul", "Aug"]:
@@ -231,12 +234,18 @@ def race_prep():
   if view_result_btn:
     pyautogui.click(view_result_btn)
     time.sleep(0.5)
-    for i in range(4):
+    for i in range(3):
       pyautogui.tripleClick(interval=0.2)
       time.sleep(0.5)
 
 def after_race():
-  click(img="assets/buttons/next_btn.png", minSearch=10)
+  # Try to click next_btn.png, if not found, click at (185, 900) and wait for it to appear
+  if not click(img="assets/buttons/next_btn.png", minSearch=10):
+    print("[INFO] next_btn.png not found, clicking at (185, 900) and waiting...")
+    pyautogui.click(185, 900)
+    time.sleep(1)  # Wait a bit for the button to appear
+    click(img="assets/buttons/next_btn.png", minSearch=10)
+  
   time.sleep(0.5) # Raise a bit
   pyautogui.click()
   click(img="assets/buttons/next2_btn.png", minSearch=10)
@@ -292,8 +301,8 @@ def career_lobby():
     # Prioritize racing when criteria are not met to help achieve goals
     criteria_met = (criteria.split(" ")[0] == "criteria" or "criteria met" in criteria.lower() or "goal achieved" in criteria.lower())
     year_parts = year.split(" ")
-    is_junior_year = year_parts[0] == "Junior"
-    if not criteria_met and not is_junior_year and turn < 10:
+    is_pre_debut = "Pre-Debut" in year
+    if not criteria_met and not is_pre_debut and turn < 10:
       print(f"Goal Status: Criteria not met - Prioritizing racing to meet goals")
       race_found = do_race()
       if race_found:
@@ -352,7 +361,7 @@ def career_lobby():
 
     year_parts = year.split(" ")
     # If Prioritize G1 Race is true, check G1 race every turn
-    if PRIORITIZE_G1_RACE and year_parts[0] != "Junior" and is_racing_available(year):
+    if PRIORITIZE_G1_RACE and "Pre-Debut" not in year and is_racing_available(year):
       print("G1 Race Check: Looking for G1 race...")
       g1_race_found = do_race(PRIORITIZE_G1_RACE)
       if g1_race_found:
@@ -375,10 +384,10 @@ def career_lobby():
     
     best_training = do_something(results_training)
     if best_training == "PRIORITIZE_RACE":
-      # Check if it's Junior Year - if so, don't prioritize racing
+      # Check if it's Pre-Debut - if so, don't prioritize racing
       year_parts = year.split(" ")
-      if year_parts[0] == "Junior":
-        print("[INFO] Junior Year detected. Skipping race prioritization and proceeding to training.")
+      if "Pre-Debut" in year:
+        print("[INFO] Pre-Debut detected. Skipping race prioritization and proceeding to training.")
         # Re-evaluate training without race prioritization
         best_training = do_something_fallback(results_training)
         if best_training:
