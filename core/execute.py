@@ -255,6 +255,17 @@ def generate_event_variations(event_name):
     """Generate variations of the OCR result to handle common mistakes"""
     event_variations = [event_name]
     
+    # Clean up common OCR artifacts first
+    clean_name = event_name.strip().rstrip("'\"`").strip()
+    if clean_name != event_name and clean_name not in event_variations:
+        event_variations.append(clean_name)
+    
+    # Also try removing leading/trailing punctuation
+    import re
+    clean_name2 = re.sub(r'^[^\w\s]+|[^\w\s]+$', '', clean_name).strip()
+    if clean_name2 != clean_name and clean_name2 not in event_variations:
+        event_variations.append(clean_name2)
+    
     # Generate variations with smart character substitutions
     import re
     

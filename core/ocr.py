@@ -293,17 +293,28 @@ def find_best_event_match(ocr_text):
         best_match = ocr_text
         best_ratio = 0.0
         
+        # Preprocess OCR text to handle common issues
+        clean_ocr_text = ocr_text.strip()
+        # Remove trailing quotes and other common OCR artifacts
+        clean_ocr_text = clean_ocr_text.rstrip("'\"`").strip()
+        
         for db_event_name in all_event_names:
             # Clean the database event name (remove chain symbols)
             clean_db_name = db_event_name.replace("(❯)", "").replace("(❯❯)", "").replace("(❯❯❯)", "").strip()
             
-            # Calculate similarity ratio
-            ratio = SequenceMatcher(None, ocr_text.lower(), clean_db_name.lower()).ratio()
+            # Calculate similarity ratio with cleaned OCR text
+            ratio = SequenceMatcher(None, clean_ocr_text.lower(), clean_db_name.lower()).ratio()
             
-            # If we find a very good match (ratio > 0.8), use it
-            if ratio > 0.8 and ratio > best_ratio:
+            # Lower threshold to 0.7 for better matching, and also check if OCR text is a prefix
+            if (ratio > 0.7 and ratio > best_ratio) or clean_db_name.lower().startswith(clean_ocr_text.lower()):
                 best_ratio = ratio
                 best_match = db_event_name
+        
+        # Debug logging
+        if best_match != ocr_text:
+            print(f"[DEBUG] OCR: '{ocr_text}' -> Matched: '{best_match}' (ratio: {best_ratio:.3f})")
+        else:
+            print(f"[DEBUG] OCR: '{ocr_text}' -> No match found (best ratio: {best_ratio:.3f})")
         
         return best_match
     except Exception as e:

@@ -7,12 +7,12 @@
     "guts"
   ],
   "minimum_mood": "GREAT",
-  "maximum_failure": 10,
+  "maximum_failure": 15,
   "prioritize_g1_race": false,
-  "skill_point_cap": 700,
+  "skill_point_cap": 1000,
   "enable_skill_point_check": true,
   "min_support": 0,
-  "do_race_when_bad_training": true,
+  "do_race_when_bad_training": false,
   "stat_caps": {
     "spd": 1100,
     "sta": 1100,
