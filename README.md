@@ -161,6 +161,19 @@ The bot now includes intelligent event choice selection. You can configure which
 }
 ```
 
+#### Customizing Event Priorities
+
+If you want to customize the event priorities beyond the default configuration, you can reference `all_unique_event_outcomes.json` which contains all possible event outcomes in the game until 08/2025. This file serves as a comprehensive reference for:
+
+- **All possible stat gains** (Speed +10, Stamina +15, etc.)
+- **All skill hints** (various skill names with hint bonuses)
+- **All support card bond changes** (character names with bond +5/-5)
+- **All conditions** (Charming, Hot Topic, Practice Perfect, etc.)
+- **All energy changes** (Energy +10, Energy -15, etc.)
+- **All mood changes** (Mood +1, Mood -1, etc.)
+
+Use this file to discover new event outcomes you might want to add to your `Good_choices` or `Bad_choices` arrays in `event_priority.json`. For example, if you find a specific skill hint or support card bond change you want to prioritize, you can copy the exact text from `all_unique_event_outcomes.json` and add it to your configuration.
+
 #### Event Choice Selection Logic
 
 The bot automatically selects the best event choice based on your configured priorities:
