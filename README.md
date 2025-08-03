@@ -1,5 +1,12 @@
 # Umamusume Auto Training Bot
+[![Discord](https://img.shields.io/badge/Discord-Join%20our%20community-7289DA?style=for-the-badge&logo=discord&logoColor=white)](http://discord.gg/PhVmBtfsKp)
+
+[![GitHub Stars](https://img.shields.io/github/stars/Kisegami/umamusume-auto-train?style=for-the-badge&logo=github)](https://github.com/Kisegami/umamusume-auto-train/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/Kisegami/umamusume-auto-train?style=for-the-badge&logo=github)](https://github.com/Kisegami/umamusume-auto-train/issues)
+[![GitHub Forks](https://img.shields.io/github/forks/Kisegami/umamusume-auto-train?style=for-the-badge&logo=github)](https://github.com/Kisegami/umamusume-auto-train/network)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/Kisegami/umamusume-auto-train?style=for-the-badge&logo=github)](https://github.com/Kisegami/umamusume-auto-train/commits)
  
+
 Like the title says, this is a simple auto training for Umamusume.
 
 This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
