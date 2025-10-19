@@ -1,0 +1,30 @@
+{
+    "skill_priority": [
+        "Lone Wolf",
+        "Groundwork",
+        "Early Lead",
+        "Focus",
+        "Right-Handed",
+        "Left-Handed",
+        "Wet Conditions",
+        "Firm Conditions",
+        "Corner Recovery",
+        "Standard Distance",
+        "Sunny Days",
+        "Summer Runner",
+        "Angling and Scheming",
+        "Homestretch Haste",
+        "Front Runner Straightaways",
+        "Front Runner Corners",
+        "Medium Corners",
+        "Playtimes Over",
+        "Tail Held High",
+        "Levelheaded",
+        "Leader's Pride",
+        "Front Runner Savvy",
+         "Red Shift/LP1211-M"
+    ],
+    "gold_skill_upgrades": {
+        "Swinging Maestro": "Corner Recovery"
+    }
+}

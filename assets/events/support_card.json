@@ -306,33 +306,15 @@
     }
   },
   {
-    "EventName": "(❯) I'm Not Afraid!",
-    "EventOptions": {
-      "Bottom Option": "Energy +20\nEvent chain ended"
-    }
-  },
-  {
     "EventName": "(❯❯) Can't Catch Me!",
     "EventOptions": {
       "Top Option": "Randomly either\nSpeed +15\nLeader's Pride hint +3\nTwin Turbo bond +5\nor\nEnergy -10\nSpeed +10\nEvent chain ended"
     }
   },
   {
-    "EventName": "(❯❯) Can't Catch Me!",
-    "EventOptions": {
-      "Bottom Option": "Energy +25\nEvent chain ended"
-    }
-  },
-  {
     "EventName": "(❯❯❯) Turbo Is Strong!",
     "EventOptions": {
       "Top Option": "Randomly either\nEnergy -10\nSpeed +5\nEarly Lead hint +3\nor\nEnergy -10\nSpeed +25\nTaking the Lead hint +3\nTwin Turbo bond +5"
-    }
-  },
-  {
-    "EventName": "(❯❯❯) Turbo Is Strong!",
-    "EventOptions": {
-      "Bottom Option": "Energy +15\nWatchful Eye hint +1"
     }
   },
   {
@@ -1718,13 +1700,7 @@
   {
     "EventName": "(❯❯) Guidance and Friends",
     "EventOptions": {
-      "Top Option": "Skill points +45\nMatikanefukukitaru bond +5"
-    }
-  },
-  {
-    "EventName": "(❯❯) Guidance and Friends",
-    "EventOptions": {
-      "Bottom Option": "Randomly either\nEnergy +10\nMood +1\nRight-Handed ○ hint +3\nMatikanefukukitaru bond +5\nor\nEnergy -20\nRight-Handed ○ hint +1\nMatikanefukukitaru bond +5"
+      "Bottom Option": "Right-Handed hint +1"
     }
   },
   {
@@ -1905,12 +1881,6 @@
     "EventName": "Firm and Plain, Yet Close to Virtue",
     "EventOptions": {
       "Bottom Option": "Mood +1\nPower +5"
-    }
-  },
-  {
-    "EventName": "The Will to Protect!",
-    "EventOptions": {
-      "Top Option": "Stamina +10\nPower +10"
     }
   },
   {
@@ -2174,12 +2144,6 @@
   {
     "EventName": "What Should I Do?",
     "EventOptions": {
-      "Top Option": "Speed +5\nStamina +5\nWisdom +5\nSilence Suzuka bond +5"
-    }
-  },
-  {
-    "EventName": "What Should I Do?",
-    "EventOptions": {
       "Bottom Option": "Left-Handed ○ hint +1\nSilence Suzuka bond +5"
     }
   },
@@ -2409,12 +2373,6 @@
     "EventName": "Etude to Victory",
     "EventOptions": {
       "Bottom Option": "Power +5\nSkill points +15"
-    }
-  },
-  {
-    "EventName": "Beyond Our Limited Time",
-    "EventOptions": {
-      "Top Option": "Energy +10\nSkill points +15"
     }
   },
   {
@@ -3333,6 +3291,18 @@
     "EventName": "Misdirection",
     "EventOptions": {
       "Bottom Option": "Skill points +30\nFuji Kiseki bond +5"
+    }
+  },
+  {
+    "EventName": "Yaeno's Off-Site Training",
+    "EventOptions": {
+      "Top Option": "Speed +5\nPower +5\nSkill points +10"
+    }
+  },
+  {
+    "EventName": "A Reasonable Diet vs. an Explosive Diet",
+    "EventOptions": {
+      "Bottom Option": "Energy +10\nWit +10\nSkill points +10\nPlaytime's Over! hint +3"
     }
   }
 ]

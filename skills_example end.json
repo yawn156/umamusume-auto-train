@@ -1,0 +1,28 @@
+{
+    "skill_priority": [
+        "Lone Wolf",
+        "Right-Handed",
+        "Wet Conditions",
+        "Firm Conditions",
+        "Standard Distance",
+        "Hanshin Racecourse",
+        "Summer Days",
+        "Nimble Navigator",
+        "Corner Adept",
+        "Medium Corners",
+        "Slipstream",
+        "End Closer Corners",
+        "Ramp Up",
+        "Straightaway Adept",
+        "End Closer Straightaways",
+        "Medium Straightaways",
+        "Playtime's Over!",
+        "Tail Held High",
+        "Red Shift/LP1211-M",
+        "Triumphant Pulse",
+        "Shooting for Victory"
+    ],
+    "gold_skill_upgrades": {
+        "Swinging Maestro": "Corner Recovery"
+    }
+}

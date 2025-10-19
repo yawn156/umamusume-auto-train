@@ -1,0 +1,16 @@
+{
+    "skill_priority": [
+        "Lone Wolf",
+        "Right-Handed",
+        "Firm Conditions",
+        "Homestretch Haste",
+        "Corner Adept",
+        "Shooting for Victory!"
+    ],
+    "gold_skill_upgrades": {
+        "Swinging Maestro": "Corner Recovery",
+        "Encroacher Shadow": "Straightaway Spurt",
+        "Sleeping Lion": "Standing By",
+        "Professor of Curvature": "Corner Adept"
+    }
+}
