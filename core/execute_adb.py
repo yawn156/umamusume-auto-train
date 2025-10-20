@@ -370,15 +370,14 @@ def do_rest():
         time.sleep(1.0)  # Wait for lobby to load
     
     # Now look for rest buttons in the lobby
-    rest_btn = locate_on_screen("assets/buttons/rest_btn.png", confidence=0.8)
-    rest_summer_btn = locate_on_screen("assets/buttons/rest_summer_btn.png", confidence=0.8)
+    rest_btn = locate_on_screen("assets/buttons/rest_btn.png", confidence=0.5)
+    rest_summer_btn = locate_on_screen("assets/buttons/rest_summer_btn.png", confidence=0.5)
     
     debug_print(f"[DEBUG] Rest button found: {rest_btn}")
     debug_print(f"[DEBUG] Summer rest button found: {rest_summer_btn}")
     
     if rest_btn:
         debug_print(f"[DEBUG] Clicking rest button at {rest_btn}")
-        time.sleep(1)
         print(f"[INFO] Clicking rest button at {rest_btn}")
         from utils.adb_input import tap
         tap(rest_btn[0], rest_btn[1])

@@ -613,33 +613,25 @@ def handle_event_choice():
                 recommended_option = analysis["recommended_option"]
                 
                 # If no recommendation, default to first choice
-                # Also, if only one option is defined in the database, always pick the first on-screen choice
-                if len(options) == 1 and choices_found > 1:
-                    print("[INFO] Only one option defined in database, defaulting to first on-screen choice.")
-                    choice_number = 1
-                    return choice_number, True, choice_locations
-
                 if recommended_option is None:
                     print("No recommendation found, defaulting to first choice")
                     choice_number = 1
                 else:
-                    # Map recommended option to choice number based on choices found on screen
+                    # Map recommended option to choice number based on name and choices on screen
                     choice_number = 1  # Default to first choice
-                    
-                    # Use choices_found (from screen) instead of expected_options (from JSON)
-                    if choices_found == 2:
-                        if "top" in recommended_option.lower():
-                            choice_number = 1
-                        elif "bottom" in recommended_option.lower():
+                    rec_lower = recommended_option.lower()
+
+                    if "bottom" in rec_lower:
+                        # If "bottom" is recommended, pick the last available choice
+                        choice_number = choices_found
+                    elif "middle" in rec_lower:
+                        # If "middle" is recommended, pick the second choice (only valid for 3+ choices)
+                        if choices_found >= 3:
                             choice_number = 2
-                    elif choices_found == 3:
-                        if "top" in recommended_option.lower():
-                            choice_number = 1
-                        elif "middle" in recommended_option.lower():
-                            choice_number = 2
-                        elif "bottom" in recommended_option.lower():
-                            choice_number = 3
-                    elif choices_found >= 4:
+                    elif "top" in rec_lower:
+                        # If "top" is recommended, it's the first choice
+                        choice_number = 1
+                    else:
                         # For 4+ choices, look for "Option 1", "Option 2", etc.
                         option_match = re.search(r'option\s*(\d+)', recommended_option.lower())
                         if option_match:
