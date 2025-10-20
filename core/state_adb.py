@@ -46,7 +46,7 @@ def stat_state():
     return result
 
 # Check support card in each training
-def check_support_card(threshold=0.85):
+def check_support_card(screenshot=None, threshold=0.85):
     SUPPORT_ICONS = {
         "spd": "assets/icons/support_card_type_spd.png",
         "sta": "assets/icons/support_card_type_sta.png",
@@ -58,8 +58,9 @@ def check_support_card(threshold=0.85):
 
     count_result = {}
 
-    # Take a screenshot for template matching
-    screenshot = take_screenshot()
+    # Take a screenshot for template matching if not provided
+    if screenshot is None:
+        screenshot = take_screenshot()
     
     # Save full screenshot for debugging only in debug mode
     if DEBUG_MODE:
@@ -123,7 +124,7 @@ def check_support_card(threshold=0.85):
 
     return count_result
 
-def check_hint(template_path: str = "assets/icons/hint.png", confidence: float = 0.6) -> bool:
+def check_hint(screenshot=None, template_path: str = "assets/icons/hint.png", confidence: float = 0.6) -> bool:
     """Detect presence of a hint icon within the support card search region.
 
     Args:
@@ -134,7 +135,8 @@ def check_hint(template_path: str = "assets/icons/hint.png", confidence: float =
         True if at least one hint icon is found in `SUPPORT_CARD_ICON_REGION`, otherwise False.
     """
     try:
-        screenshot = take_screenshot()
+        if screenshot is None:
+            screenshot = take_screenshot()
 
         # Convert PIL (left, top, right, bottom) to OpenCV (x, y, width, height)
         left, top, right, bottom = SUPPORT_CARD_ICON_REGION
@@ -285,7 +287,7 @@ def fuzzy_match_mood(text):
         return "AWFUL"
     
     # GREAT patterns - check before GOOD to avoid conflicts
-    if any(pattern in cleaned_text for pattern in ['GREAT', 'GREA', 'REAT', 'EA']):
+    if any(pattern in cleaned_text for pattern in ['GREAT', 'GREA', 'REAT', 'GRE', 'ENGR', 'EA']):
         debug_print(f"[DEBUG] GREAT pattern match in: '{text}'")
         return "GREAT"
     

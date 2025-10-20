@@ -233,8 +233,8 @@ def check_training():
         region_cv = (left, top, right - left, bottom - top)
 
         # Support counts
-        support_counts = check_support_card()
-        total_support = sum(support_counts.values())
+        support_counts = check_support_card(screenshot)
+        total_support = sum(support_counts.values()) if support_counts else 0
 
         # Bond levels per type
         detailed_support = {}
@@ -264,11 +264,11 @@ def check_training():
                 detailed_support[t_key] = entries
 
         # Hint
-        hint_found = check_hint()
+        hint_found = check_hint(screenshot)
 
         # Calculate score for this training type
         from core.state_adb import calculate_training_score
-        score = calculate_training_score(detailed_support, hint_found, key)
+        score = calculate_training_score(detailed_support, bool(hint_found), key)
 
         debug_print(f"[DEBUG] Support counts: {support_counts} | hint_found={hint_found} | score={score}")
 

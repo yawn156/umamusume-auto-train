@@ -1,0 +1,13 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto eol=lf
+
+# Explicitly declare text files you want to always be normalized and converted
+# to LF line endings.
+*.py text
+*.json text
+*.md text
+*.txt text
+
+# Files that should be treated as binary and left alone.
+*.png binary
+*.jpg binary
