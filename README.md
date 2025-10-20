@@ -2,7 +2,7 @@
 
 This fork simply has my own configurations to pick skills and events, the event handler has been modified slightly so whenever "support_card.json" only has 1 option it always picks it so it's easier to add new events and make sure you pick the option you want.
 
-Go support the main dev!
+Go support the main dev!(my dumbass forked the pc repo instead of the emu one lol)
 
 An automated training bot for Umamusume that works with **Android emulators** using ADB (Android Debug Bridge).
 
