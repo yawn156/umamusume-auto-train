@@ -112,6 +112,64 @@ def analyze_event_options(options, priorities):
     good_choices = priorities.get("Good_choices", [])
     bad_choices = priorities.get("Bad_choices", [])
     
+    # Special check: Prioritize skill hints if only one option has one
+    hint_options = []
+    for option_name, option_reward in options.items():
+        if "hint +" in option_reward.lower():
+            hint_options.append(option_name)
+    
+    if len(hint_options) == 1:
+        recommended_option = hint_options[0]
+        recommendation_reason = f"Prioritized based on unique skill hint: '{options[recommended_option]}'"
+        # We can return early as this is a priority override
+        return {
+            "recommended_option": recommended_option,
+            "recommendation_reason": recommendation_reason,
+            "option_analysis": {
+                name: {"reward": reward, "good_matches": [], "bad_matches": [], "has_good": False, "has_bad": False}
+                for name, reward in options.items()
+            },
+            "all_options_bad": False
+        }
+
+def _find_best_option_by_priority(option_analysis, good_choices, options_to_consider):
+    """Helper to find the best option from a list based on good choice priority."""
+    best_options = []
+    best_priority = -1
+
+    for option_name in options_to_consider:
+        analysis = option_analysis[option_name]
+        # Find the highest priority good choice in this option
+        for good_choice in analysis["good_matches"]:
+            try:
+                priority = good_choices.index(good_choice)
+                if priority < best_priority or best_priority == -1:
+                    best_priority = priority
+                    best_options = [option_name]
+                elif priority == best_priority and option_name not in best_options:
+                    best_options.append(option_name)
+            except ValueError:
+                continue
+
+    if not best_options:
+        return None
+
+    # Tie-breaking: if multiple options have the same best priority
+    if len(best_options) > 1:
+        # Prefer option with more good choices, then fewer bad choices
+        best_option = None
+        max_good_choices = -1
+        min_bad_choices = 999
+        for option_name in best_options:
+            good_count = len(option_analysis[option_name]["good_matches"])
+            bad_count = len(option_analysis[option_name]["bad_matches"])
+            if good_count > max_good_choices or (good_count == max_good_choices and bad_count < min_bad_choices):
+                max_good_choices = good_count
+                min_bad_choices = bad_count
+                best_option = option_name
+        return best_option
+    return best_options[0]
+
     option_analysis = {}
     all_options_bad = True
     
@@ -152,48 +210,13 @@ def analyze_event_options(options, priorities):
     
     if all_options_have_bad:
         # If all options have bad choices, ignore bad choices and pick based on good choice priority
-        best_options = []  # Store all options with the same best priority
-        best_priority = -1
-        
-        for option_name, analysis in option_analysis.items():
-            # Find the highest priority good choice in this option
-            for good_choice in analysis["good_matches"]:
-                try:
-                    priority = good_choices.index(good_choice)
-                    if priority < best_priority or best_priority == -1:
-                        # New best priority found, reset the list
-                        best_priority = priority
-                        best_options = [option_name]
-                    elif priority == best_priority:
-                        # Same priority, add to the list
-                        if option_name not in best_options:
-                            best_options.append(option_name)
-                except ValueError:
-                    continue
-        
-        if best_options:
-            # If we have multiple options with the same priority, use tie-breaking
-            if len(best_options) > 1:
-                # Since all options have bad choices, ignore bad choices and prefer option with more good choices
-                best_option = None
-                max_good_choices = -1
-                
-                for option_name in best_options:
-                    good_count = len(option_analysis[option_name]["good_matches"])
-                    if good_count > max_good_choices:
-                        max_good_choices = good_count
-                        best_option = option_name
-                
-                # If still tied, choose the first option (top choice)
-                if best_option is None:
-                    best_option = best_options[0]
-                
-                recommended_option = best_option
-                recommendation_reason = f"All options have bad choices. Multiple options have same priority good choice. Selected based on tie-breaking (more good choices, then top choice)."
-            else:
-                best_option = best_options[0]
-                recommended_option = best_option
-                recommendation_reason = f"All options have bad choices. Recommended based on highest priority good choice: '{option_analysis[best_option]['good_matches'][0]}'"
+        # Consider all options that have at least one good choice
+        options_with_good = [name for name, analysis in option_analysis.items() if analysis["has_good"]]
+        best_option = _find_best_option_by_priority(option_analysis, good_choices, options_with_good)
+
+        if best_option:
+            recommended_option = best_option
+            recommendation_reason = f"All options have bad choices. Recommended based on highest priority good choice: '{option_analysis[best_option]['good_matches'][0]}'"
         else:
             # No good choices found, pick the option with the least bad choices
             best_option = None
@@ -212,73 +235,18 @@ def analyze_event_options(options, priorities):
                 recommendation_reason = "All options have bad choices. No recommendation possible."
     else:
         # Normal case: some options don't have bad choices - avoid bad choices completely
-        best_options = []
-        best_priority = -1
-        
-        for option_name, analysis in option_analysis.items():
-            # ONLY consider options that have good choices AND NO bad choices
-            if analysis["has_good"] and not analysis["has_bad"]:
-                # Find the highest priority good choice in this option
-                for good_choice in analysis["good_matches"]:
-                    try:
-                        priority = good_choices.index(good_choice)
-                        if priority < best_priority or best_priority == -1:
-                            # New best priority found, reset the list
-                            best_priority = priority
-                            best_options = [option_name]
-                        elif priority == best_priority:
-                            # Same priority, add to the list
-                            if option_name not in best_options:
-                                best_options.append(option_name)
-                    except ValueError:
-                        continue
-        
-        if best_options:
-            # If we have multiple options with the same priority, use tie-breaking
-            if len(best_options) > 1:
-                # Prefer option with more good choices, then fewer bad choices
-                best_option = None
-                max_good_choices = -1
-                min_bad_choices = 999
-                
-                for option_name in best_options:
-                    good_count = len(option_analysis[option_name]["good_matches"])
-                    bad_count = len(option_analysis[option_name]["bad_matches"])
-                    
-                    if good_count > max_good_choices or (good_count == max_good_choices and bad_count < min_bad_choices):
-                        max_good_choices = good_count
-                        min_bad_choices = bad_count
-                        best_option = option_name
-                
-                recommended_option = best_option
-                recommendation_reason = f"Multiple options have same priority good choice. Selected based on tie-breaking (more good choices, then fewer bad choices)."
-            else:
-                best_option = best_options[0]
-                recommended_option = best_option
-                recommendation_reason = f"Recommended based on highest priority good choice: '{option_analysis[best_option]['good_matches'][0]}'"
+        # First, try to find a "clean" option: good choices and no bad choices.
+        clean_options = [name for name, analysis in option_analysis.items() if analysis["has_good"] and not analysis["has_bad"]]
+        best_option = _find_best_option_by_priority(option_analysis, good_choices, clean_options)
+
+        if best_option:
+            recommended_option = best_option
+            recommendation_reason = f"Recommended based on highest priority good choice: '{option_analysis[best_option]['good_matches'][0]}'"
         else:
             # No clean options (good without bad) found, try options with good choices even if they have bad choices
             debug_print("[DEBUG] No clean options found, considering options with good choices despite bad choices...")
-            fallback_options = []
-            best_priority = -1
-            
-            for option_name, analysis in option_analysis.items():
-                if analysis["has_good"]:  # Has good choices (ignoring bad choices for now)
-                    # Find the highest priority good choice in this option
-                    for good_choice in analysis["good_matches"]:
-                        try:
-                            priority = good_choices.index(good_choice)
-                            if priority < best_priority or best_priority == -1:
-                                # New best priority found, reset the list
-                                best_priority = priority
-                                fallback_options = [option_name]
-                            elif priority == best_priority:
-                                # Same priority, add to the list
-                                if option_name not in fallback_options:
-                                    fallback_options.append(option_name)
-                        except ValueError:
-                            continue
-            
+            fallback_options = [name for name, analysis in option_analysis.items() if analysis["has_good"]]
+
             if fallback_options:
                 # Choose from fallback options, prefer fewer bad choices
                 best_option = None

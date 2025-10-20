@@ -1160,9 +1160,37 @@ def career_lobby():
             print(f"[INFO] Selected {best_training.upper()} training based on scoring algorithm")
             do_train(best_training)
         else:
+            # Fallback logic when no training meets standard criteria
             debug_print("[DEBUG] No suitable training found based on scoring criteria")
             print("[INFO] No suitable training found based on scoring criteria.")
+
+            # High-energy fallback: Avoid resting at high energy
+            if energy_percentage > 90:
+                print("[INFO] Energy is high. Attempting to find a productive alternative to resting.")
+                
+                # Create a config that ignores score but respects safety
+                desperate_config = {**training_config, 'min_score': -1.0, 'min_wit_score': -1.0}
+                
+                # 1. Prioritize safe WIT training as it recovers energy
+                wit_data = results_training.get('wit')
+                if wit_data and wit_data.get('failure', 100) <= training_config.get('maximum_failure', 15):
+                    print("[INFO] Prioritizing safe WIT training to recover energy.")
+                    do_train('wit')
+                    continue
+                
+                desperate_training = choose_best_training(results_training, desperate_config)
+                
+                # 2. If WIT is not an option, take any other safe training
+                if desperate_training:
+                    print(f"[INFO] No safe WIT training. Selected best available safe option: {desperate_training.upper()}")
+                    do_train(desperate_training)
+                    continue
+                else:
+                    print("[INFO] No safe training options available at all. Proceeding to default action.")
             
+            # If not high energy, or if high-energy fallbacks failed, proceed with original logic
+            
+            # Original fallback logic
             # Check if we should prioritize racing when no good training is available
             do_race_when_bad_training = training_config.get("do_race_when_bad_training", True)
             
