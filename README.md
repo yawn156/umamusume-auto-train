@@ -1,32 +1,27 @@
 # Umamusume Auto Training Bot (ADB/Android Version)
 
-<a> This fork simply has my own configurations to pick skills and events, the event handler has been modified slightly so whenever "support_card.json" only has 1 option it always picks it so it's easier to add new events and make sure you pick the option you want</a>
-</br>
-<a> go support the main dev </a> 
+This fork simply has my own configurations to pick skills and events, the event handler has been modified slightly so whenever "support_card.json" only has 1 option it always picks it so it's easier to add new events and make sure you pick the option you want.
+
+Go support the main dev!
 
 An automated training bot for Umamusume that works with **Android emulators** using ADB (Android Debug Bridge).
 
-**🎮 Platform:** Android Emulator (BlueStacks, LDPlayer, etc.)  
-**📱 Resolution:** 1080x1920 (Portrait)  
-**🔧 Technology:** ADB commands for screen capture and input
+**Platform:** Android Emulator (BlueStacks, LDPlayer, etc.)  
+**Resolution:** 1080x1920 (Portrait)  
 
 This ADB version provides the same intelligent training logic as the PC version but runs on Android emulators, offering better stability and easier setup.
 
 This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
 ## Features
 
-### 🤖 ADB/Android Specific Features
-- **ADB Integration**: Uses Android Debug Bridge for reliable screen capture and input
-- **Emulator Optimized**: Designed specifically for Android emulators (BlueStacks, LDPlayer, etc.)
-- **Portrait Layout**: Optimized for 1080x1920 portrait mode gameplay
-- **Stable Performance**: More reliable than screen-based automation methods
-
-### 🎯 Training & Racing Intelligence
+### Key Features
 - Automatically trains Uma with stat prioritization
 - Keeps racing until fan count meets the goal, and always picks races with matching aptitude
 - Checks mood and handles debuffs automatically
 - Rest and recreation management
 - Prioritizes G1 races if available for fan farming
+- **Smarter Event Choices**: Prioritizes unique skill hints in events.
+- **Smarter Training Choices**: When energy is high, it will pick safe WIT training to burn energy productively instead of resting.
 - **Auto Skill Purchase**: Automatically purchases skills when skill points exceed cap
 - Stat caps to prevent overtraining specific stats
 - **Intelligent Event Choice Selection**: Automatically analyzes event options and selects the best choice based on configured priorities
@@ -34,7 +29,6 @@ This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.c
 - **Energy Bar Detection**: Automatically monitors energy levels (adaptive even with max energy increasing events) and skips training when energy is too low
 - **Advanced Training Scoring**: Uses support card bond levels, hints, and failure rates to calculate optimal training choices
 - **Smart Race Strategy Management**: Automatically checks and adjusts race strategy before races
-- **Automatic Race Retry**: Auto use clock to retry the race 
 
 ## Getting Started
 
@@ -42,7 +36,7 @@ This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.c
 
 #### Software Requirements
 - [Python 3.10+](https://www.python.org/downloads/)
-- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) (for text recognition)
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract)
 - [ADB (Android Debug Bridge)](https://developer.android.com/studio/command-line/adb) (for Android communication)
 
 #### Android Emulator Requirements
@@ -309,7 +303,7 @@ The bot uses a configurable scoring system defined in `training_score.json`:
   }
 }
 ```
-### Training Logic
+## Training Logic
 
 The bot uses an advanced training logic system with intelligent scoring:
 
@@ -331,10 +325,9 @@ Training Score = Support Card Score + Hint Bonus
 3. **Score Threshold Filtering**: Apply `min_score` and `min_wit_score` requirements
 4. **Scoring Evaluation**: Calculate scores for all eligible training options
 5. **Tie-Breaking**: Use priority order from `priority_stat` configuration
-6. **Final Selection**: Choose training with highest score
 
 
-### **Skill Configuration**
+## Skill Configuration
 
 The bot now includes a comprehensive skill management system controlled by a json file:
 
@@ -388,11 +381,7 @@ The bot now supports multiple skill configuration files, allowing you to create 
 
 #### Benefits of Multiple Templates
 
-- **Build Variety**: Create different skill builds for different Uma
-- **Easy Switching**: Change builds by editing one line in `config.json`
-- **Template Sharing**: Share skill builds with other players
-- **Testing**: Try different skill priorities without losing your main configuration
-### Event Choice Configuration
+## Event Choice Configuration
 
 The bot now includes intelligent event choice selection. You can configure which choices are considered "good" or "bad" in `event_priority.json`:
 
@@ -476,10 +465,7 @@ python main_adb.py
 
 ### Known Issues
 
-#### 🤖 ADB/Android Specific
-- Requires stable ADB connection (emulator must stay running)
-- May need to restart if emulator restarts or ADB connection is lost
-- Performance depends on emulator performance and host system resources
+#### ADB/Android Specific
 - If you experience connection issues, try restarting the ADB server with these commands in your terminal:
   ```bash
   adb kill-server
