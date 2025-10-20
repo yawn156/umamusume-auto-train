@@ -4,9 +4,6 @@
 </br>
 <a> go support the main dev </a> 
 
- 
- 
-
 An automated training bot for Umamusume that works with **Android emulators** using ADB (Android Debug Bridge).
 
 **🎮 Platform:** Android Emulator (BlueStacks, LDPlayer, etc.)  
@@ -16,12 +13,6 @@ An automated training bot for Umamusume that works with **Android emulators** us
 This ADB version provides the same intelligent training logic as the PC version but runs on Android emulators, offering better stability and easier setup.
 
 This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
-# Umamusume Auto Training Bot
-
-<a> This fork simply has my own configurations to pick skills and events, the event handler has been modified slightly so whenever "support_card.json" only has 1 option it always picks it so it's easier to add new events and make sure you pick the option you want</a>
-</br>
-<a> go support the main dev </a> 
-
 ## Features
 
 ### 🤖 ADB/Android Specific Features
@@ -489,6 +480,11 @@ python main_adb.py
 - Requires stable ADB connection (emulator must stay running)
 - May need to restart if emulator restarts or ADB connection is lost
 - Performance depends on emulator performance and host system resources
+- If you experience connection issues, try restarting the ADB server with these commands in your terminal:
+  ```bash
+  adb kill-server
+  adb start-server
+  ```
 
 #### 🎮 Game Logic
 - Some Uma that has special event/target goals (like Restricted Train Goldship). So please avoid using Goldship for training right now to keep your 12 billion yen safe.
