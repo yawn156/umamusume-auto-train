@@ -16,6 +16,11 @@ An automated training bot for Umamusume that works with **Android emulators** us
 This ADB version provides the same intelligent training logic as the PC version but runs on Android emulators, offering better stability and easier setup.
 
 This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
+# Umamusume Auto Training Bot
+
+<a> This fork simply has my own configurations to pick skills and events, the event handler has been modified slightly so whenever "support_card.json" only has 1 option it always picks it so it's easier to add new events and make sure you pick the option you want</a>
+</br>
+<a> go support the main dev </a> 
 
 ## Features
 
