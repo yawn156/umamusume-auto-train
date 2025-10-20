@@ -1,16 +1,8 @@
 # Umamusume Auto Training Bot
-<a href="http://discord.gg/PhVmBtfsKp" target="_blank"><img src="https://img.shields.io/discord/1399387259245166674?color=5865F2&label=Join%20our%20Discord&logo=discord&logoColor=white&style=for-the-badge" alt="Join our Discord server"></a>
 
-<a href="https://www.buymeacoffee.com/kisegami" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
- 
-
-Like the title says, this is a simple auto training for Umamusume.
-
-This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
-
-[Demo video](https://youtu.be/CXSYVD-iMJk)
-
-![Screenshot](screenshot.png)
+<a> This fork simply has my own configurations to pick skills and events, the event handler has been modified slightly so whenever "support_card.json" only has 1 option it always picks it so it's easier to add new events and make sure you pick the option you want</a>
+</br>
+<a> go support the main dev </a> 
 
 ## Features
 
