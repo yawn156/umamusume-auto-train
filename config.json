@@ -6,7 +6,7 @@
     "pwr",
     "guts"
   ],
-  "minimum_mood": "NORMAL",
+  "minimum_mood": "GOOD",
   "maximum_failure": 15,
   "strategy": "FRONT",
   "prioritize_g1_race": false,
