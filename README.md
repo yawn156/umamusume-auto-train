@@ -24,6 +24,7 @@ This ADB version provides the same intelligent training logic as the PC version 
 - Checks mood and handles debuffs automatically
 - Rest and recreation management
 - Prioritizes G1 races if available for fan farming
+### Advanced Features added in this fork:
 - **Smarter Event Choices**: Prioritizes unique skill hints in events.
 - **Smarter Training Choices**: When energy is high, it will pick safe WIT training to burn energy productively instead of resting.
 - **Auto Skill Purchase**: Automatically purchases skills when skill points exceed cap
