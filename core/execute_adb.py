@@ -202,6 +202,11 @@ def check_training():
     bond levels and hint presence in one hover pass before computing failure rates."""
     debug_print("[DEBUG] Checking training options...")
     
+    # Load maximum failure from config for early exit logic
+    with open("config.json", "r", encoding="utf-8") as config_file:
+        config = json.load(config_file)
+    maximum_failure = config.get("maximum_failure", 15)
+
     # Fixed coordinates for each training type
     training_coords = {
         "spd": (165, 1557),
@@ -210,9 +215,16 @@ def check_training():
         "guts": (735, 1566),
         "wit": (936, 1572)
     }
+    
+    # Optimized training check order: from lowest base failure rate to highest
+    training_order = ["wit", "guts", "pwr", "sta", "spd"]
+    
     results = {}
 
-    for key, coords in training_coords.items():
+    for key in training_order:
+        # Get coordinates from the original map
+        coords = training_coords[key]
+
         debug_print(f"[DEBUG] Checking {key.upper()} training at coordinates {coords}...")
         
         # Proper hover simulation: move to position, hold, check, move away, release
@@ -284,6 +296,21 @@ def check_training():
             "confidence": confidence,
             "score": score
         }
+
+        # --- Optimization: Early exit based on failure rates ---
+        # If WIT training is already too high, no need to check others
+        if key == 'wit' and failure_chance >= maximum_failure:
+            print(f"[INFO] WIT failure rate ({failure_chance}%) is at or above max ({maximum_failure}%). Skipping other training checks.")
+            debug_print("[DEBUG] Optimization: Early exit due to high WIT failure rate.")
+            break # Exit the loop
+
+        # If GUTS or PWR are significantly higher, no need to check STA/SPD
+        high_failure_threshold = maximum_failure * 1.5
+        if key in ['guts', 'pwr'] and failure_chance > high_failure_threshold:
+            print(f"[INFO] {key.upper()} failure rate ({failure_chance}%) is too high. Skipping remaining checks.")
+            debug_print(f"[DEBUG] Optimization: Early exit due to high {key.upper()} failure rate.")
+            break # Exit the loop
+        # --- End of Optimization ---
         
         # Use clean format matching training_score_test.py exactly
         print(f"\n[{key.upper()}]")
@@ -314,7 +341,7 @@ def check_training():
     
     # Print overall summary
     print("\n=== Overall ===")
-    for k in ["spd", "sta", "pwr", "guts", "wit"]:
+    for k in training_order: # Print in the order they were checked
         if k in results:
             data = results[k]
             print(f"{k.upper()}: Score={data['score']:.2f}, Fail={data['failure']}% - Confident: {data['confidence']:.2f}")
