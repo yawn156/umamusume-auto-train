@@ -941,7 +941,7 @@ def career_lobby():
                         continue
                 else:
                     # If no choice locations were returned, skip clicking and continue loop
-                    if not choice_locations:
+                    if not choice_locations and not success:
                         debug_print("[DEBUG] Skipping event click due to no visible choices after stabilization")
                         continue
                     print("[WARNING] Event analysis failed, falling back to top choice")

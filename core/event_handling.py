@@ -112,6 +112,16 @@ def analyze_event_options(options, priorities):
     good_choices = priorities.get("Good_choices", [])
     bad_choices = priorities.get("Bad_choices", [])
     
+    # Guard clause: If no options are provided, return a default failure state.
+    if not options:
+        debug_print("[DEBUG] analyze_event_options called with no options.")
+        return {
+            "recommended_option": None,
+            "recommendation_reason": "No options provided for analysis.",
+            "option_analysis": {},
+            "all_options_bad": True
+        }
+
     # Special check: Prioritize skill hints if only one option has one
     hint_options = []
     for option_name, option_reward in options.items():
@@ -131,6 +141,120 @@ def analyze_event_options(options, priorities):
             },
             "all_options_bad": False
         }
+
+    option_analysis = {}
+    all_options_bad = True
+    
+    # Analyze each option
+    for option_name, option_reward in options.items():
+        reward_lower = option_reward.lower()
+        
+        # Check for good choices
+        good_matches = []
+        for good_choice in good_choices:
+            if good_choice.lower() in reward_lower:
+                good_matches.append(good_choice)
+        
+        # Check for bad choices
+        bad_matches = []
+        for bad_choice in bad_choices:
+            if bad_choice.lower() in reward_lower:
+                bad_matches.append(bad_choice)
+        
+        option_analysis[option_name] = {
+            "reward": option_reward,
+            "good_matches": good_matches,
+            "bad_matches": bad_matches,
+            "has_good": len(good_matches) > 0,
+            "has_bad": len(bad_matches) > 0
+        }
+        
+        # If any option has good choices, not all options are bad
+        if len(good_matches) > 0:
+            all_options_bad = False
+    
+    # Check if ALL options have bad choices (regardless of good choices)
+    all_options_have_bad = all(analysis["has_bad"] for analysis in option_analysis.values())
+    
+    # Determine recommendation
+    recommended_option = None
+    recommendation_reason = ""
+    
+    if all_options_have_bad:
+        # If all options have bad choices, ignore bad choices and pick based on good choice priority
+        # Consider all options that have at least one good choice
+        options_with_good = [name for name, analysis in option_analysis.items() if analysis["has_good"]]
+        best_option = _find_best_option_by_priority(option_analysis, good_choices, options_with_good)
+
+        if best_option:
+            recommended_option = best_option
+            recommendation_reason = f"All options have bad choices. Recommended based on highest priority good choice: '{option_analysis[best_option]['good_matches'][0]}'"
+        else:
+            # No good choices found, pick the option with the least bad choices
+            best_option = None
+            min_bad_choices = 999
+            
+            for option_name, analysis in option_analysis.items():
+                bad_count = len(analysis["bad_matches"])
+                if bad_count < min_bad_choices:
+                    min_bad_choices = bad_count
+                    best_option = option_name
+            
+            if best_option:
+                recommended_option = best_option
+                recommendation_reason = f"All options have bad choices. Selected option with least bad choices: {len(option_analysis[best_option]['bad_matches'])} bad choices"
+            else:
+                recommendation_reason = "All options have bad choices. No recommendation possible."
+    else:
+        # Normal case: some options don't have bad choices - avoid bad choices completely
+        # First, try to find a "clean" option: good choices and no bad choices.
+        clean_options = [name for name, analysis in option_analysis.items() if analysis["has_good"] and not analysis["has_bad"]]
+        best_option = _find_best_option_by_priority(option_analysis, good_choices, clean_options)
+
+        if best_option:
+            recommended_option = best_option
+            recommendation_reason = f"Recommended based on highest priority good choice: '{option_analysis[best_option]['good_matches'][0]}'"
+        else:
+            # No clean options (good without bad) found, try options with good choices even if they have bad choices
+            debug_print("[DEBUG] No clean options found, considering options with good choices despite bad choices...")
+            fallback_options = [name for name, analysis in option_analysis.items() if analysis["has_good"]]
+
+            if fallback_options:
+                # Choose from fallback options, prefer fewer bad choices
+                best_option = None
+                min_bad_choices = 999
+                
+                for option_name in fallback_options:
+                    bad_count = len(option_analysis[option_name]["bad_matches"])
+                    if bad_count < min_bad_choices:
+                        min_bad_choices = bad_count
+                        best_option = option_name
+                
+                recommended_option = best_option
+                recommendation_reason = f"No clean options available. Selected option with good choices but fewest bad choices: {min_bad_choices} bad choices"
+            else:
+                # Absolutely no good choices found, pick the option with the least bad choices
+                best_option = None
+                min_bad_choices = 999
+                
+                for option_name, analysis in option_analysis.items():
+                    bad_count = len(analysis["bad_matches"])
+                    if bad_count < min_bad_choices:
+                        min_bad_choices = bad_count
+                        best_option = option_name
+                
+                if best_option:
+                    recommended_option = best_option
+                    recommendation_reason = f"No good choices found. Selected option with least bad choices: {len(option_analysis[best_option]['bad_matches'])} bad choices"
+                else:
+                    recommendation_reason = "No good choices found. No recommendation possible."
+    
+    return {
+        "recommended_option": recommended_option,
+        "recommendation_reason": recommendation_reason,
+        "option_analysis": option_analysis,
+        "all_options_bad": all_options_bad
+    }
 
 def _find_best_option_by_priority(option_analysis, good_choices, options_to_consider):
     """Helper to find the best option from a list based on good choice priority."""
@@ -170,40 +294,6 @@ def _find_best_option_by_priority(option_analysis, good_choices, options_to_cons
         return best_option
     return best_options[0]
 
-    option_analysis = {}
-    all_options_bad = True
-    
-    # Analyze each option
-    for option_name, option_reward in options.items():
-        reward_lower = option_reward.lower()
-        
-        # Check for good choices
-        good_matches = []
-        for good_choice in good_choices:
-            if good_choice.lower() in reward_lower:
-                good_matches.append(good_choice)
-        
-        # Check for bad choices
-        bad_matches = []
-        for bad_choice in bad_choices:
-            if bad_choice.lower() in reward_lower:
-                bad_matches.append(bad_choice)
-        
-        option_analysis[option_name] = {
-            "reward": option_reward,
-            "good_matches": good_matches,
-            "bad_matches": bad_matches,
-            "has_good": len(good_matches) > 0,
-            "has_bad": len(bad_matches) > 0
-        }
-        
-        # If any option has good choices, not all options are bad
-        if len(good_matches) > 0:
-            all_options_bad = False
-    
-    # Check if ALL options have bad choices (regardless of good choices)
-    all_options_have_bad = all(analysis["has_bad"] for analysis in option_analysis.values())
-    
     # Determine recommendation
     recommended_option = None
     recommendation_reason = ""

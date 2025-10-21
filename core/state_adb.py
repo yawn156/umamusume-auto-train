@@ -244,7 +244,7 @@ def check_failure(train_type: str) -> tuple[int, float]:
         tuple[int, float]: The failure rate and the OCR confidence.
     """
     debug_print(f"[DEBUG] ===== STARTING FAILURE DETECTION for {train_type.upper()} =====")
-    max_retries = 3
+    max_retries = 5
     for i in range(max_retries):
         rate, confidence = _check_failure_single_pass(train_type)
         

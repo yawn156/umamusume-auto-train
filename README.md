@@ -3,7 +3,7 @@
 This fork simply has my own configs, optimizations and small touches to the code to pick skills, changes made were added in the key features section.
 (my dumbass forked the pc repo instead of the emu one lol)
 
-#New
+### New
 Added retry logic for low cofidence on ocr checks, should be a little faster and more precise when choosing trainings.
 
 Go support the main dev!
@@ -476,7 +476,7 @@ python main_adb.py
   adb start-server
   ```
 
-#### 🎮 Game Logic
+#### Game Logic
 - Some Uma that has special event/target goals (like Restricted Train Goldship). So please avoid using Goldship for training right now to keep your 12 billion yen safe.
 - Tesseract OCR might misread failure chance (e.g., reads 33% as 3%) and proceeds with training anyway
 - If you bring a friend support card (like Tazuna/Aoi Kiryuin) and do recreation, the bot can't decide whether to date with the friend support card or the Uma
