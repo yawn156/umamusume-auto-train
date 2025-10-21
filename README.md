@@ -3,6 +3,9 @@
 This fork simply has my own configs, optimizations and small touches to the code to pick skills, changes made were added in the key features section.
 (my dumbass forked the pc repo instead of the emu one lol)
 
+#New
+Added retry logic for low cofidence on ocr checks, should be a little faster and more precise when choosing trainings.
+
 Go support the main dev!
 
 An automated training bot for Umamusume that works with **Android emulators** using ADB (Android Debug Bridge).

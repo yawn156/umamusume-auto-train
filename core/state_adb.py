@@ -159,15 +159,11 @@ def check_hint(screenshot=None, template_path: str = "assets/icons/hint.png", co
         debug_print(f"[DEBUG] check_hint failed: {e}")
         return False
 
-def check_failure(train_type):
+def _check_failure_single_pass(train_type: str) -> tuple[int, float]:
     """
-    Check failure rate for a specific training type using direct region OCR.
-    Args:
-        train_type (str): One of 'spd', 'sta', 'pwr', 'guts', 'wit'
-    Returns:
-        (rate, confidence)
+    Performs a single full pass of OCR logic (white and yellow text) to find the failure rate.
+    This is the internal helper for the main check_failure function.
     """
-    debug_print(f"[DEBUG] ===== STARTING FAILURE DETECTION for {train_type.upper()} =====")
     from utils.constants_phone import FAILURE_REGION_SPD, FAILURE_REGION_STA, FAILURE_REGION_PWR, FAILURE_REGION_GUTS, FAILURE_REGION_WIT
     from utils.adb_screenshot import enhanced_screenshot, take_screenshot
     import numpy as np
@@ -176,92 +172,94 @@ def check_failure(train_type):
     from PIL import ImageEnhance
 
     region_map = {
-        'spd': FAILURE_REGION_SPD,
-        'sta': FAILURE_REGION_STA,
-        'pwr': FAILURE_REGION_PWR,
-        'guts': FAILURE_REGION_GUTS,
-        'wit': FAILURE_REGION_WIT
+        'spd': FAILURE_REGION_SPD, 'sta': FAILURE_REGION_STA, 'pwr': FAILURE_REGION_PWR,
+        'guts': FAILURE_REGION_GUTS, 'wit': FAILURE_REGION_WIT
     }
     region = region_map[train_type]
-    percentage_patterns = [
-        r"(\d{1,3})\s*%",  # "29%", "29 %" - most reliable
-        r"%\s*(\d{1,3})",  # "% 29" - reversed format
-        r"(\d{1,3})",      # Just the number - fallback
-    ]
-    # Step 1: Try white-specialized OCR 3 times
-    for attempt in range(3):
-        debug_print(f"[DEBUG] White OCR attempt {attempt+1}/3 for {train_type.upper()}")
-        img = enhanced_screenshot(region)
-        if DEBUG_MODE:
-            img.save(f"debug_failure_{train_type}_white_attempt_{attempt+1}.png")
+    percentage_patterns = [r"(\d{1,3})\s*%", r"%\s*(\d{1,3})", r"(\d{1,3})"]
+
+    # Step 1: Try white-specialized OCR
+    debug_print(f"[DEBUG] White OCR pass for {train_type.upper()}")
+    img = enhanced_screenshot(region)
+    if DEBUG_MODE:
+        img.save(f"debug_failure_{train_type}_white.png")
+    
+    ocr_data = pytesseract.image_to_data(np.array(img), config='--oem 3 --psm 6', output_type=pytesseract.Output.DICT)
+    text = ' '.join(ocr_data['text']).strip()
+    debug_print(f"[DEBUG] White OCR result: '{text}'")
+    
+    confidences = [float(c) for c in ocr_data['conf'] if float(c) != -1]
+    avg_confidence = (sum(confidences) / len(confidences) / 100.0) if confidences else 0.0
+    
+    for pattern in percentage_patterns:
+        match = re.search(pattern, text)
+        if match:
+            rate = int(match.group(1))
+            if 0 <= rate <= 100:
+                debug_print(f"[DEBUG] Found percentage: {rate}% (white) confidence: {avg_confidence:.2f}")
+                if avg_confidence >= 0.6: # Use a reasonable confidence threshold
+                    return (rate, avg_confidence)
+
+    # Step 2: Try yellow threshold OCR
+    debug_print(f"[DEBUG] Yellow OCR pass for {train_type.upper()}")
+    raw_img = take_screenshot().crop(region)
+    raw_img = raw_img.resize((raw_img.width * 2, raw_img.height * 2), Image.BICUBIC)
+    raw_img = raw_img.convert("RGB")
+    raw_np = np.array(raw_img)
+    yellow_mask = (
+        (raw_np[:, :, 0] > 200) & (raw_np[:, :, 1] > 150) & (raw_np[:, :, 2] < 100)
+    )
+    yellow_result = np.zeros_like(raw_np)
+    yellow_result[yellow_mask] = [255, 255, 255]
+    yellow_img = Image.fromarray(yellow_result).convert("L")
+    yellow_img = ImageEnhance.Contrast(yellow_img).enhance(1.5)
+    if DEBUG_MODE:
+        yellow_img.save(f"debug_failure_{train_type}_yellow.png")
+    
+    ocr_data = pytesseract.image_to_data(np.array(yellow_img), config='--oem 3 --psm 6', output_type=pytesseract.Output.DICT)
+    text = ' '.join(ocr_data['text']).strip()
+    debug_print(f"[DEBUG] Yellow OCR result: '{text}'")
+    
+    confidences = [float(c) for c in ocr_data['conf'] if float(c) != -1]
+    avg_confidence = (sum(confidences) / len(confidences) / 100.0) if confidences else 0.0
+    
+    for pattern in percentage_patterns:
+        match = re.search(pattern, text)
+        if match:
+            rate = int(match.group(1))
+            if 0 <= rate <= 100:
+                debug_print(f"[DEBUG] Found percentage: {rate}% (yellow) confidence: {avg_confidence:.2f}")
+                if avg_confidence >= 0.6:
+                    return (rate, avg_confidence)
+
+    # If no confident match was found in this pass
+    return (100, 0.0)
+
+def check_failure(train_type: str) -> tuple[int, float]:
+    """
+    Check failure rate for a training type, with retries on low confidence.
+    Args:
+        train_type (str): One of 'spd', 'sta', 'pwr', 'guts', 'wit'
+    Returns:
+        tuple[int, float]: The failure rate and the OCR confidence.
+    """
+    debug_print(f"[DEBUG] ===== STARTING FAILURE DETECTION for {train_type.upper()} =====")
+    max_retries = 3
+    for i in range(max_retries):
+        rate, confidence = _check_failure_single_pass(train_type)
         
-        # Get OCR data with confidence
-        ocr_data = pytesseract.image_to_data(np.array(img), config='--oem 3 --psm 6', output_type=pytesseract.Output.DICT)
-        text = pytesseract.image_to_string(np.array(img), config='--oem 3 --psm 6').strip()
-        debug_print(f"[DEBUG] White OCR result: '{text}'")
+        # If confidence is good, we're done.
+        if confidence > 0.0:
+            return rate, confidence
         
-        # Calculate average confidence from OCR data
-        confidences = [conf for conf in ocr_data['conf'] if conf != -1]
-        avg_confidence = (sum(confidences) / len(confidences) / 100.0) if confidences else 0.0
-        
-        for pattern in percentage_patterns:
-            match = re.search(pattern, text)
-            if match:
-                rate = int(match.group(1))
-                if 0 <= rate <= 100:
-                    debug_print(f"[DEBUG] Found percentage: {rate}% (white) confidence: {avg_confidence:.2f} for {train_type.upper()}")
-                    if avg_confidence >= 0.7:
-                        debug_print(f"[DEBUG] Confidence {avg_confidence:.2f} meets minimum 0.7, accepting result")
-                        return (rate, avg_confidence)
-                    else:
-                        debug_print(f"[DEBUG] Confidence {avg_confidence:.2f} below minimum 0.7, continuing to retry")
-        if attempt < 2:
-            debug_print("[DEBUG] No valid percentage found, retrying...")
-            time.sleep(0.1)
-    # Step 2: Try yellow threshold OCR 3 times
-    for attempt in range(3):
-        debug_print(f"[DEBUG] Yellow OCR attempt {attempt+1}/3 for {train_type.upper()}")
-        raw_img = take_screenshot().crop(region)
-        raw_img = raw_img.resize((raw_img.width * 2, raw_img.height * 2), Image.BICUBIC)
-        raw_img = raw_img.convert("RGB")
-        raw_np = np.array(raw_img)
-        yellow_mask = (
-            (raw_np[:, :, 0] > 200) &  # High red
-            (raw_np[:, :, 1] > 150) &  # High green
-            (raw_np[:, :, 2] < 100)    # Low blue
-        )
-        yellow_result = np.zeros_like(raw_np)
-        yellow_result[yellow_mask] = [255, 255, 255]
-        yellow_img = Image.fromarray(yellow_result).convert("L")
-        yellow_img = ImageEnhance.Contrast(yellow_img).enhance(1.5)
-        if DEBUG_MODE:
-            yellow_img.save(f"debug_failure_{train_type}_yellow_attempt_{attempt+1}.png")
-        
-        # Get OCR data with confidence
-        ocr_data = pytesseract.image_to_data(np.array(yellow_img), config='--oem 3 --psm 6', output_type=pytesseract.Output.DICT)
-        text = pytesseract.image_to_string(np.array(yellow_img), config='--oem 3 --psm 6').strip()
-        debug_print(f"[DEBUG] Yellow OCR result: '{text}'")
-        
-        # Calculate average confidence from OCR data
-        confidences = [conf for conf in ocr_data['conf'] if conf != -1]
-        avg_confidence = (sum(confidences) / len(confidences) / 100.0) if confidences else 0.0
-        
-        for pattern in percentage_patterns:
-            match = re.search(pattern, text)
-            if match:
-                rate = int(match.group(1))
-                if 0 <= rate <= 100:
-                    debug_print(f"[DEBUG] Found percentage: {rate}% (yellow) confidence: {avg_confidence:.2f} for {train_type.upper()}")
-                    if avg_confidence >= 0.7:
-                        debug_print(f"[DEBUG] Confidence {avg_confidence:.2f} meets minimum 0.7, accepting result")
-                        return (rate, avg_confidence)
-                    else:
-                        debug_print(f"[DEBUG] Confidence {avg_confidence:.2f} below minimum 0.7, continuing to retry")
-        if attempt < 2:
-            debug_print("[DEBUG] No valid yellow percentage found, retrying...")
-            time.sleep(0.1)
-    debug_print(f"[DEBUG] No valid failure rate found for {train_type.upper()}, returning 100% (safe fallback)")
-    return (100, 0.0)  # 100% failure rate when detection completely fails (prevents choosing unknown training)
+        # If confidence is 0.0, log and retry if we have attempts left.
+        if i < max_retries - 1:
+            print(f"[INFO] OCR for {train_type.upper()} failure rate failed (confidence 0.0). Retrying... ({i+1}/{max_retries-1})")
+            time.sleep(0.2) # Small delay before retrying
+
+    # If all retries fail, return the safe fallback.
+    print(f"[WARNING] All {max_retries} OCR attempts for {train_type.upper()} failure rate failed. Defaulting to 100%.")
+    return (100, 0.0)
 
 def fuzzy_match_mood(text):
     """
