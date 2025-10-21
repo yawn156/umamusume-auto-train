@@ -142,6 +142,21 @@ def analyze_event_options(options, priorities):
             "all_options_bad": False
         }
 
+    # Special check: If only one option is defined in the JSON, pick it immediately.
+    if len(options) == 1:
+        recommended_option = list(options.keys())[0]
+        recommendation_reason = f"Auto-selected based on single available option in JSON."
+        return {
+            "recommended_option": recommended_option,
+            "recommendation_reason": recommendation_reason,
+            "option_analysis": {
+                name: {"reward": reward, "good_matches": [], "bad_matches": [], "has_good": False, "has_bad": False}
+                for name, reward in options.items()
+            },
+            "all_options_bad": False
+        }
+
+
     option_analysis = {}
     all_options_bad = True
     

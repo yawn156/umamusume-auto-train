@@ -9,7 +9,7 @@
   "minimum_mood": "NORMAL",
   "maximum_failure": 15,
   "strategy": "FRONT",
-  "prioritize_g1_race": false,
+  "prioritize_g1_race": true,
   "retry_race": true,
   "skill_point_cap": 500,
   "skill_purchase": "auto",
