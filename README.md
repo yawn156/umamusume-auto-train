@@ -1,10 +1,6 @@
 # Umamusume Auto Training Bot (ADB/Android Version)
-
-This fork simply has my own configs, optimizations and small touches to the code to pick skills, changes made were added in the key features section.
+This fork has my optimizations and configurations to more aggresively do auto trainings for parent farming, retries on OCR and logic check for failure chance so it can run faster.
 (my dumbass forked the pc repo instead of the emu one lol)
-
-### New
-Added retry logic for low cofidence on ocr checks, should be a little faster and more precise when choosing trainings.
 
 Go support the main dev!
 
@@ -33,6 +29,7 @@ This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.c
 - **Energy Bar Detection**: Automatically monitors energy levels (adaptive even with max energy increasing events) and skips training when energy is too low
 - **Advanced Training Scoring**: Uses support card bond levels, hints, and failure rates to calculate optimal training choices
 - **Smart Race Strategy Management**: Automatically checks and adjusts race strategy before races
+- **OCR Retries**: Checks up to 5 times if the failure chance is correct before defaulting to 100% fail, way more consistent.
 
 ## Getting Started
 
@@ -53,7 +50,7 @@ This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.c
 #### 1. Clone Repository
 
 ```bash
-git clone https://github.com/Kisegami/Uma-Musume-Emulator-Auto-Train
+git clone https://github.com/yawn156/umamusume-auto-train
 cd Uma-Musume-Emulator-Auto-Train
 ```
 
