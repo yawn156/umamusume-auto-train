@@ -11,7 +11,12 @@ An automated training bot for Umamusume that works with **Android emulators** us
 
 This ADB version provides the same intelligent training logic as the PC version but runs on Android emulators, offering better stability and easier setup.
 
-This project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
+Forked from [Kisegami/Uma-Musume-Emulator-Auto-Train](https://github.com/Kisegami/Uma-Musume-Emulator-Auto-Train)
+</a>
+Main branch project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
+
+
+
 ## Features
 
 ### Key Features
