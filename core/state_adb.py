@@ -226,9 +226,9 @@ def check_failure(train_type):
         raw_img = raw_img.convert("RGB")
         raw_np = np.array(raw_img)
         yellow_mask = (
-            (raw_np[:, :, 0] > 180) &  # High red
-            (raw_np[:, :, 1] > 120) &  # High green
-            (raw_np[:, :, 2] < 80)     # Low blue
+            (raw_np[:, :, 0] > 200) &  # High red
+            (raw_np[:, :, 1] > 150) &  # High green
+            (raw_np[:, :, 2] < 100)    # Low blue
         )
         yellow_result = np.zeros_like(raw_np)
         yellow_result[yellow_mask] = [255, 255, 255]

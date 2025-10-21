@@ -1,0 +1,24 @@
+{
+    "skill_priority": [
+        "Right-Handed",
+        "Left-Handed",
+        "Wet Conditions",
+        "Firm Conditions",
+        "Standard Distance",
+        "Rainy Days",
+        "Homestretch Haste",
+        "Playtime's Over",
+        "Tail Held High",
+        "Concentration",
+        "Professor of Curvature",
+        "Swinging Maestro",
+        "Red Shift/LP1211-M",
+        "Gourmand"
+    ],
+    "gold_skill_upgrades": {
+        "Swinging Maestro": "Corner Recovery",
+        "Professor of Curvature": "Corner Adept",
+        "Concentration": "Focus",
+        "Gourmand": "Hydrate"
+    }
+}

@@ -1,28 +1,24 @@
 {
   "priority_stat": [
-    "spd",
-    "sta",
+    "sdp",
     "wit",
+    "sta",
     "pwr",
     "guts"
   ],
- "minimum_mood": "GREAT",
+  "minimum_mood": "NORMAL",
   "maximum_failure": 15,
-  
   "strategy": "FRONT",
   "prioritize_g1_race": false,
   "retry_race": true,
-
-  "skill_point_cap": 400,
+  "skill_point_cap": 500,
   "skill_purchase": "auto",
   "skill_file": "skills_example front.json",
   "enable_skill_point_check": true,
-
   "min_energy": 30,
   "min_score": 1.0,
   "min_wit_score": 1.0,
   "do_race_when_bad_training": true,
-
   "stat_caps": {
     "spd": 1200,
     "sta": 1100,

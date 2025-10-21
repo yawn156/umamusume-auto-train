@@ -2,6 +2,7 @@ import time
 import subprocess
 import sys
 import json
+import os
 from utils.adb_screenshot import run_adb_command, get_screen_size, load_config
 from core.execute_adb import career_lobby
 
