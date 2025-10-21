@@ -1,6 +1,5 @@
 # Umamusume Auto Training Bot (ADB/Android Version)
 This fork has my optimizations and configurations to more aggresively do auto trainings for parent farming, retries on OCR and logic check for failure chance so it can run faster.
-(my dumbass forked the pc repo instead of the emu one lol)
 
 Go support the main dev!
 
@@ -13,7 +12,7 @@ This ADB version provides the same intelligent training logic as the PC version 
 
 - Forked from [Kisegami/Uma-Musume-Emulator-Auto-Train](https://github.com/Kisegami/Uma-Musume-Emulator-Auto-Train)
 - Main branch project is inspired by [samsulpanjul/umamusume-auto-train](https://github.com/samsulpanjul/umamusume-auto-train)
-
+(my dumbass forked the pc repo instead of the emu one lol)
 
 
 ## Features
@@ -24,16 +23,16 @@ This ADB version provides the same intelligent training logic as the PC version 
 - Checks mood and handles debuffs automatically
 - Rest and recreation management
 - Prioritizes G1 races if available for fan farming
-### Advanced Features added in this fork:
-- **Smarter Event Choices**: Prioritizes unique skill hints in events.
-- **Smarter Training Choices**: When energy is high, it will pick safe WIT training to burn energy productively instead of resting.
 - **Auto Skill Purchase**: Automatically purchases skills when skill points exceed cap
 - Stat caps to prevent overtraining specific stats
 - **Intelligent Event Choice Selection**: Automatically analyzes event options and selects the best choice based on configured priorities
 - **Automated Claw Machine**: Automatically detects and handles claw machine mini-games with randomized timing (99% Failure rate bruh)
+### Advanced Features and optimizations added in this fork:
 - **Energy Bar Detection**: Automatically monitors energy levels (adaptive even with max energy increasing events) and skips training when energy is too low
 - **Advanced Training Scoring**: Uses support card bond levels, hints, and failure rates to calculate optimal training choices
 - **Smart Race Strategy Management**: Automatically checks and adjusts race strategy before races
+- **Smarter Event Choices**: Prioritizes unique skill hints in events.
+- **Smarter Training Choices**: When energy is high, it will pick safe WIT training to train productively instead of resting.
 - **OCR Retries**: Checks up to 5 times if the failure chance is correct before defaulting to 100% fail, way more consistent.
 
 ## Getting Started
